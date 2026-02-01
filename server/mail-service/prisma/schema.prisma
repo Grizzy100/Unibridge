@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["mail"]
+}
+
+enum MessageType {
+  GENERAL
+  NOTICE
+  ASSIGNMENT
+  ATTENDANCE
+  OUTPASS
+  DISCIPLINE
+  FEE
+  HOSTEL
+  MESS
+  SPORTS
+  PLACEMENT
+  INTERNSHIP
+  EVENT
+  WORKSHOP
+  SEMINAR
+  MAINTENANCE
+  ANNOUNCEMENT
+
+  @@schema("mail")
+}
+
+enum FolderType {
+  INBOX
+  SENT
+  DRAFT
+  TRASH
+  ARCHIVE
+
+  @@schema("mail")
+}
+
+enum TargetKind {
+  USER
+  EMAIL
+  ROLE
+  COURSE
+  BATCH
+  SCHOOL
+  DEPARTMENT
+  YEAR
+  SEMESTER
+  HOSTEL_BLOCK
+
+  @@schema("mail")
+}
+
+enum RecipientType {
+  TO
+  CC
+  BCC
+  SENDER
+
+  @@schema("mail")
+}
+
+model Message {
+  id          String      @id @default(cuid())
+  senderId    String
+  senderName  String?
+  senderEmail String?
+  subject     String
+  body        String      @db.Text
+  type        MessageType @default(GENERAL)
+  threadId    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  participants MessageParticipant[]
+  attachments  Attachment[]
+  targets      MessageTarget[]
+
+  @@index([senderId])
+  @@index([threadId])
+  @@index([type])
+  @@index([createdAt])
+  @@schema("mail")
+}
+
+model MessageParticipant {
+  id        String  @id @default(cuid())
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  userId        String
+  recipientType RecipientType?
+  folder        FolderType     @default(INBOX)
+  readAt        DateTime?
+  flagged       Boolean        @default(false)
+  deletedAt     DateTime?
+  archivedAt    DateTime?
+  createdAt     DateTime       @default(now())
+
+  @@unique([messageId, userId])
+  @@index([userId, folder])
+  @@index([userId, flagged])
+  @@index([readAt])
+  @@index([deletedAt])
+  @@schema("mail")
+}
+
+model MessageTarget {
+  id        String  @id @default(cuid())
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  kind          TargetKind
+  value         String
+  resolvedCount Int?
+  createdAt     DateTime   @default(now())
+
+  @@index([messageId])
+  @@index([kind, value])
+  @@schema("mail")
+}
+
+model Attachment {
+  id        String  @id @default(cuid())
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  filename     String
+  url          String
+  mimeType     String
+  size         Int
+  cloudinaryId String   @unique
+  createdAt    DateTime @default(now())
+
+  @@index([messageId])
+  @@schema("mail")
+}
+
+model ReadReceipt {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+  ipAddress String?
+  userAgent String?
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+  @@schema("mail")
+}

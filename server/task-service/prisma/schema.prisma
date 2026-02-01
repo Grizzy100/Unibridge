@@ -1,0 +1,64 @@
+//server/task-service/prisma/schema.prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["task"]
+}
+
+enum SubmissionStatus {
+  PENDING // No submission yet
+  SUBMITTED // Submitted on time, awaiting review
+  LATE // Submitted past deadline
+  RESUBMITTING // Teacher unlocked resubmission
+  GRADED // Final state with marks
+
+  @@schema("task")
+}
+
+model Task {
+  id               String           @id @default(cuid())
+  courseId         String
+  teacherId        String
+  title            String
+  description      String?
+  type             String? // "LAB" only
+  dueDate          DateTime
+  questionFileUrl  String?
+  questionFileType String?
+  maxMarks         Int              @default(5) // Always out of 5
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  submissions      TaskSubmission[]
+
+  @@index([courseId])
+  @@index([teacherId])
+  @@schema("task")
+}
+
+model TaskSubmission {
+  id             String           @id @default(cuid())
+  taskId         String
+  task           Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  studentId      String
+  customDueDate  DateTime? // Individual deadline extension
+  submittedAt    DateTime?
+  answerFileUrl  String?
+  answerFileType String?
+  comment        String?
+  status         SubmissionStatus @default(PENDING)
+  marks          Int? // Out of 5 (set when GRADED)
+  feedback       String?
+  gradedAt       DateTime?
+  attemptCount   Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([taskId, studentId])
+  @@index([studentId])
+  @@index([status])
+  @@schema("task")
+}

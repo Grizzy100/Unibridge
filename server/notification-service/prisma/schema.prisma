@@ -1,0 +1,74 @@
+//server\notification-service\prisma\schema.prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["notification"]
+}
+
+enum NotificationType {
+  ATTENDANCE_MARKED
+  ATTENDANCE_LOW
+  WEEKLY_SUMMARY
+  OUTPASS_CREATED
+  OUTPASS_PARENT_APPROVED
+  OUTPASS_PARENT_REJECTED
+  OUTPASS_WARDEN_APPROVED
+  OUTPASS_WARDEN_REJECTED
+  OUTPASS_CANCELLED
+  TASK_CREATED
+  TASK_GRADED
+  TASK_DEADLINE_EXTENDED
+  TASK_RESUBMISSION_GRANTED
+
+  @@schema("notification")
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  DELETED
+
+  @@schema("notification")
+}
+
+model Notification {
+  id String @id @default(cuid())
+
+  userId  String
+  type    NotificationType
+  title   String
+  message String
+  data    Json?
+
+  status NotificationStatus @default(UNREAD)
+
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@schema("notification")
+}
+
+model EmailLog {
+  id String @id @default(cuid())
+
+  recipient String
+  subject   String
+  body      String @db.Text
+
+  sent   Boolean   @default(false)
+  sentAt DateTime?
+  error  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([recipient])
+  @@index([sent])
+  @@schema("notification")
+}

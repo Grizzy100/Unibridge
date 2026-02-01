@@ -1,0 +1,186 @@
+
+//server/user-service/prisma/schema.prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+datasource db {
+  provider = "postgresql"
+  // Configure URL in your root prisma.config.ts or .env
+}
+enum Role {
+  ADMIN
+  STUDENT
+  TEACHER
+  PARENT
+  WARDEN
+}
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+}
+enum School {
+  BTECH
+  BBA
+  BCOM
+  BSC
+  BA
+  MTECH
+  MBA
+  MSC
+  MA
+}
+model User {
+  id       String   @id @default(cuid())
+  email    String   @unique
+  password String
+  role     Role
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+  parentProfile  ParentProfile?
+  wardenProfile  WardenProfile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model StudentProfile {
+  id             String            @id @default(cuid())
+  userId         String            @unique
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName      String
+  lastName       String
+  dateOfBirth    DateTime
+  gender         Gender
+  phoneNumber    String?
+  bloodGroup     BloodGroup?
+  enrollmentNumber String            @unique
+  customEmail     String?
+  school          School
+  batch           String
+  year            Int
+  semester        Int
+  specialization  String?
+  currentAddress   String?
+  permanentAddress String?
+  city            String?
+  state           String?
+  pincode         String?
+  country         String            @default("India")
+  fatherName       String?
+  motherName       String?
+  guardianName     String?
+  parentContact    String?
+  emergencyContact String?
+  cgpa            Float?
+  backlogs        Int               @default(0)
+  hostelAssigned   Boolean           @default(false)
+  hostelName       String?
+  roomNumber       String?
+  parentLinks      ParentStudentLink[]
+  courseEnrollments CourseEnrollment[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+model TeacherProfile {
+  id            String         @id @default(cuid())
+  userId        String         @unique
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime?
+  gender        Gender
+  phoneNumber   String?
+  bloodGroup    BloodGroup?
+  employeeId    String         @unique
+  department    String
+  designation   String
+  dateOfJoining DateTime
+  officeRoom    String?
+  specialization String?
+  address      String?
+  city         String?
+  state        String?
+  pincode      String?
+  coursesTaught Course[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+model ParentProfile {
+  id            String            @id @default(cuid())
+  userId        String            @unique
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName     String
+  lastName      String
+  phoneNumber   String
+  relationship  String
+  address       String?
+  city          String?
+  state         String?
+  pincode       String?
+  studentLinks  ParentStudentLink[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+model WardenProfile {
+  id            String           @id @default(cuid())
+  userId        String           @unique
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName     String
+  lastName      String
+  phoneNumber   String
+  gender        Gender
+  employeeId    String           @unique
+  hostelAssigned String
+  dateOfJoining DateTime
+  officeRoom    String?
+  address      String?
+  city         String?
+  state        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+model ParentStudentLink {
+  id          String         @id @default(cuid())
+  parentId    String
+  parent      ParentProfile  @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  relationship String
+  isPrimary    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  @@unique([parentId, studentId])
+}
+model Course {
+  id          String        @id @default(cuid())
+  courseCode  String        @unique
+  courseName  String
+  credits     Int
+  semester    Int
+  school      School?
+  department  String
+  description String?
+  teacherId   String
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+  enrollments CourseEnrollment[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+model CourseEnrollment {
+  id        String         @id @default(cuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime       @default(now())
+  @@unique([studentId, courseId])
+}

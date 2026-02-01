@@ -1,0 +1,82 @@
+# ===============================
+# OS & Editor
+# ===============================
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===============================
+# Node.js
+# ===============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===============================
+# Environment files (IMPORTANT)
+# ===============================
+.env
+.env.*
+!.env.example
+
+# ===============================
+# Build outputs
+# ===============================
+dist/
+build/
+out/
+.next/
+coverage/
+
+# ===============================
+# Prisma
+# ===============================
+generated/
+prisma/generated/
+*.db
+
+# ===============================
+# Logs
+# ===============================
+logs/
+*.log
+
+# ===============================
+# Docker
+# ===============================
+docker-data/
+**/.dockerignore
+
+# ===============================
+# Testing
+# ===============================
+coverage/
+.nyc_output/
+
+# ===============================
+# Client-specific
+# ===============================
+client/node_modules/
+client/.next/
+client/out/
+
+# ===============================
+# Server / Microservices
+# ===============================
+server/**/node_modules/
+server/**/dist/
+server/**/coverage/
+server/**/.env
+server/**/.env.*
+
+# ===============================
+# Temporary files
+# ===============================
+tmp/
+temp/

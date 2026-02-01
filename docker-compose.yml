@@ -1,0 +1,318 @@
+version: '3.8'
+services:
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: "no"
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unibridge-network
+  user-service:
+    build:
+      context: ./server/user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    restart: "no"
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./server/user-service/.env.docker
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./server/user-service/src:/usr/src/app/src
+    networks:
+      - unibridge-network
+  mail-service:
+    build:
+      context: ./server/mail-service
+      dockerfile: Dockerfile
+    container_name: mail-service
+    restart: "no"
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./server/mail-service/.env.docker
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./server/mail-service/src:/usr/src/app/src
+    depends_on:
+      - user-service
+    networks:
+      - unibridge-network
+  outpass-service:
+    build:
+      context: ./server/outpass-service
+      dockerfile: Dockerfile
+    container_name: outpass-service
+    restart: "no"
+    ports:
+      - "3003:3003"
+    env_file:
+      - ./server/outpass-service/.env.docker
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./server/outpass-service/src:/usr/src/app/src
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - unibridge-network
+  attendance-service:
+    build:
+      context: ./server/attendance-service
+      dockerfile: Dockerfile
+    container_name: attendance-service
+    restart: "no"
+    ports:
+      - "3004:3004"
+    env_file:
+      - ./server/attendance-service/.env.docker
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./server/attendance-service/src:/usr/src/app/src
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      outpass-service:
+        condition: service_started
+    networks:
+      - unibridge-network
+  task-service:
+    build:
+      context: ./server/task-service
+      dockerfile: Dockerfile
+    container_name: task-service
+    restart: "no"
+    ports:
+      - "3005:3005"
+    env_file:
+      - ./server/task-service/.env.docker
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./server/task-service/src:/usr/src/app/src
+      - ./server/task-service/uploads:/usr/src/app/uploads
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - unibridge-network
+  notification-service:
+    build:
+      context: ./server/notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    restart: "no"
+    ports:
+      - "3008:3008"
+    env_file:
+      - ./server/notification-service/.env.docker
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./server/notification-service/src:/usr/src/app/src
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      attendance-service:
+        condition: service_started
+      outpass-service:
+        condition: service_started
+      task-service:
+        condition: service_started
+    networks:
+      - unibridge-network
+networks:
+  unibridge-network:
+    name: unibridge-network
+    driver: bridge
+
+
+
+
+
+
+# version: '3.8'
+
+# services:
+#   rabbitmq:
+#     image: rabbitmq:3.13-management
+#     container_name: rabbitmq
+#     restart: unless-stopped
+#     ports:
+#       - "5672:5672"
+#       - "15672:15672"
+#     environment:
+#       - RABBITMQ_DEFAULT_USER=admin
+#       - RABBITMQ_DEFAULT_PASS=admin123
+#     volumes:
+#       - rabbitmq_data:/var/lib/rabbitmq
+#     networks:
+#       - unibridge-network
+#     healthcheck:
+#       test: ["CMD", "rabbitmq-diagnostics", "ping"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+
+#   user-service:
+#     build:
+#       context: ./server/user-service
+#       dockerfile: Dockerfile
+#     container_name: user-service
+#     restart: "no"
+#     ports:
+#       - "3001:3001"
+#     env_file:
+#       - ./server/user-service/.env.docker
+#     environment:
+#       - NODE_ENV=development
+#     volumes:
+#       - ./server/user-service/src:/usr/src/app/src
+#     networks:
+#       - unibridge-network
+
+#   notification-service:
+#     build:
+#       context: ./server/notification-service
+#       dockerfile: Dockerfile
+#     container_name: notification-service
+#     restart: "no"
+#     ports:
+#       - "3008:3008"
+#     env_file:
+#       - ./server/notification-service/.env.docker
+#     environment:
+#       - NODE_ENV=development
+#       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
+#     volumes:
+#       - ./server/notification-service/src:/usr/src/app/src
+#     depends_on:
+#       rabbitmq:
+#         condition: service_healthy
+#       user-service:
+#         condition: service_started
+#     networks:
+#       - unibridge-network
+
+#   mail-service:
+#     build:
+#       context: ./server/mail-service
+#       dockerfile: Dockerfile
+#     container_name: mail-service
+#     restart: "no"
+#     ports:
+#       - "3002:3002"
+#     env_file:
+#       - ./server/mail-service/.env.docker
+#     environment:
+#       - NODE_ENV=development
+#     volumes:
+#       - ./server/mail-service/src:/usr/src/app/src
+#     depends_on:
+#       - user-service
+#     networks:
+#       - unibridge-network
+
+#   outpass-service:
+#     build:
+#       context: ./server/outpass-service
+#       dockerfile: Dockerfile
+#     container_name: outpass-service
+#     restart: "no"
+#     ports:
+#       - "3003:3003"
+#     env_file:
+#       - ./server/outpass-service/.env.docker
+#     environment:
+#       - NODE_ENV=development
+#       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
+#     volumes:
+#       - ./server/outpass-service/src:/usr/src/app/src
+#       - ./server/outpass-service/uploads:/usr/src/app/uploads
+#     depends_on:
+#       rabbitmq:
+#         condition: service_healthy
+#       user-service:
+#         condition: service_started
+#     networks:
+#       - unibridge-network
+
+#   attendance-service:
+#     build:
+#       context: ./server/attendance-service
+#       dockerfile: Dockerfile
+#     container_name: attendance-service
+#     restart: "no"
+#     ports:
+#       - "3004:3004"
+#     env_file:
+#       - ./server/attendance-service/.env.docker
+#     environment:
+#       - NODE_ENV=development
+#       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
+#     volumes:
+#       - ./server/attendance-service/src:/usr/src/app/src
+#     depends_on:
+#       rabbitmq:
+#         condition: service_healthy
+#       user-service:
+#         condition: service_started
+#     networks:
+#       - unibridge-network
+
+#   task-service:
+#     build:
+#       context: ./server/task-service
+#       dockerfile: Dockerfile
+#     container_name: task-service
+#     restart: "no"
+#     ports:
+#       - "3005:3005"
+#     env_file:
+#       - ./server/task-service/.env.docker
+#     environment:
+#       - NODE_ENV=development
+#       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
+#     volumes:
+#       - ./server/task-service/src:/usr/src/app/src  
+#       - ./server/task-service/uploads:/usr/src/app/uploads
+#     depends_on:
+#       rabbitmq:
+#         condition: service_healthy
+#       user-service:
+#         condition: service_started
+#     networks:
+#       - unibridge-network
+
+# volumes:
+#   rabbitmq_data:
+#     driver: local
+
+# networks:
+#   unibridge-network:
+#     name: unibridge-network
+#     driver: bridge

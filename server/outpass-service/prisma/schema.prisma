@@ -1,0 +1,61 @@
+//server/outpass-service/prisma/schema.prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["outpass"]
+}
+
+// ==================== OUTPASS-SERVICE ENUMS ====================
+enum OutpassType {
+  DAY_PASS
+  LEAVE_PASS
+
+  @@schema("outpass")
+}
+
+enum OutpassStatus {
+  PENDING
+  PARENT_APPROVED
+  APPROVED
+  REJECTED
+  CANCELLED
+
+  @@schema("outpass")
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+
+  @@schema("outpass")
+}
+
+// ==================== OUTPASS-SERVICE TABLES ====================
+model OutpassRequest {
+  id                     String         @id @default(cuid())
+  studentId              String // from user-service.StudentProfile.id
+  type                   OutpassType
+  reason                 String
+  outgoingDate           DateTime
+  returningDate          DateTime
+  proofUrl               String?
+  proofPublicId          String?
+  status                 OutpassStatus  @default(PENDING)
+  parentApproval         ApprovalStatus @default(PENDING)
+  parentApprovedAt       DateTime?
+  wardenApproval         ApprovalStatus @default(PENDING)
+  wardenApprovedAt       DateTime?
+  wardenRejectionComment String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([outgoingDate, returningDate])
+  @@schema("outpass")
+}
