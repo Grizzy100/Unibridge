@@ -82,81 +82,181 @@ export default function TaskCard({ task, courseCode, onRefresh }: TaskCardProps)
   };
 
   return (
-    <>
-      <div className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            {/* Course Badge */}
-            <span className="inline-block px-2 py-0.5 bg-slate-900 text-white text-xs font-bold rounded uppercase mb-2">
+  <>
+    <div
+      className="
+      group
+      bg-white
+      rounded-2xl
+      border border-gray-200/80
+      hover:border-gray-300
+      shadow-[0_1px_2px_rgba(0,0,0,0.04)]
+      hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]
+      transition-all duration-200
+      px-5 py-4
+      "
+    >
+
+      <div className="flex items-start justify-between gap-4">
+
+        {/* LEFT */}
+        <div className="flex-1 min-w-0">
+
+          {/* Course + Status row */}
+          <div className="flex items-center gap-2 mb-2">
+
+            {/* Course badge (premium subtle version) */}
+            <span
+              className="
+              px-2 py-0.5
+              rounded-md
+              bg-slate-900/5
+              text-slate-700
+              text-[11px]
+              font-semibold
+              tracking-wide
+              "
+            >
               {courseCode}
             </span>
 
-            {/* Task Title */}
-            <h3 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">
-              {task.title}
-            </h3>
+            {/* Status */}
+            <div
+              className={`
+              flex items-center gap-1
+              px-2 py-0.5
+              rounded-full
+              text-[11px]
+              font-medium
+              border
+              ${statusConfig.bgColor}
+              ${statusConfig.textColor}
+              ${statusConfig.borderColor}
+              `}
+            >
+              <statusConfig.icon size={12} />
+              {statusConfig.label}
+            </div>
 
-            {/* Description */}
-            <p className="text-xs text-gray-600 mb-2 line-clamp-1">
-              {task.description || 'No description provided'}
-            </p>
+          </div>
 
-            {/* Meta Info */}
-            <div className="flex items-center gap-3 text-xs">
-              {/* Deadline */}
-              <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-600 font-semibold' : 'text-gray-600'}`}>
-                <FiClock className="text-xs" />
-                <span>{timeRemaining}</span>
-              </div>
 
-              {/* Marks */}
-              <div className="flex items-center gap-1 text-gray-600">
-                <FiFileText className="text-xs" />
-                <span>{task.maxMarks} marks</span>
-              </div>
+          {/* Title */}
+          <h3
+            className="
+            text-[15px]
+            font-semibold
+            text-slate-900
+            mb-1
+            line-clamp-1
+            "
+          >
+            {task.title}
+          </h3>
 
-              {/* Score (if graded) */}
-              {submission?.marks !== undefined && submission?.marks !== null && (
-                <div className="flex items-center gap-1">
-                  <span className="text-gray-600">Score:</span>
-                  <span className="font-bold text-gray-900">
-                    {submission.marks}/{task.maxMarks}
-                  </span>
+
+          {/* Description */}
+          <p
+            className="
+            text-[13px]
+            text-slate-500
+            mb-3
+            line-clamp-1
+            "
+          >
+            {task.description || "No description provided"}
+          </p>
+
+
+          {/* Meta row */}
+          <div className="flex items-center gap-4 text-[12px]">
+
+            {/* Deadline */}
+            <div
+              className={`
+              flex items-center gap-1.5
+              ${isOverdue ? "text-red-600 font-medium" : "text-slate-500"}
+              `}
+            >
+              <FiClock size={13} />
+              {timeRemaining}
+            </div>
+
+
+            {/* Marks */}
+            <div className="flex items-center gap-1.5 text-slate-500">
+              <FiFileText size={13} />
+              {task.maxMarks} marks
+            </div>
+
+
+            {/* Score */}
+            {submission?.marks !== undefined &&
+              submission?.marks !== null && (
+
+                <div className="text-slate-700 font-medium">
+                  {submission.marks}/{task.maxMarks}
                 </div>
+
               )}
-            </div>
+
           </div>
 
-          {/* Right Side */}
-          <div className="flex flex-col items-end gap-2">
-            {/* Status Badge */}
-            <div className={`flex items-center gap-1 px-2 py-0.5 ${statusConfig.bgColor} ${statusConfig.textColor} border ${statusConfig.borderColor} rounded-full text-xs font-medium`}>
-              <statusConfig.icon className="text-xs" />
-              <span>{statusConfig.label}</span>
-            </div>
-
-            {/* Submit Button */}
-            {canSubmit && (
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="px-3 py-1 bg-slate-900 text-white text-xs font-medium rounded hover:bg-slate-800 transition-colors flex items-center gap-1"
-              >
-                <FiUpload className="text-xs" />
-                Submit
-              </button>
-            )}
-          </div>
         </div>
+
+
+        {/* RIGHT SIDE */}
+        <div className="flex flex-col items-end justify-between gap-2">
+
+          {/* Due date */}
+          <div className="text-[11px] text-slate-400 whitespace-nowrap">
+            {new Date(task.dueDate).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })}
+          </div>
+
+
+          {/* Submit button */}
+          {canSubmit && (
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="
+              flex items-center gap-1.5
+              px-3 py-1.5
+              rounded-lg
+              bg-slate-900
+              text-white
+              text-[12px]
+              font-medium
+              hover:bg-slate-800
+              shadow-sm
+              hover:shadow
+              transition-all duration-200
+              "
+            >
+              <FiUpload size={13} />
+              Submit
+            </button>
+
+          )}
+
+        </div>
+
       </div>
 
-      {/* Submit Modal */}
-      {isModalOpen && (
-        <SubmitTaskModal
-          taskId={task.id}
-          onClose={() => setIsModalOpen(false)}
-          onSuccess={handleSubmitSuccess}
-        />
-      )}
-    </>
-  );
+    </div>
+
+
+    {/* Modal unchanged */}
+    {isModalOpen && (
+      <SubmitTaskModal
+        taskId={task.id}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleSubmitSuccess}
+      />
+    )}
+  </>
+);
 }

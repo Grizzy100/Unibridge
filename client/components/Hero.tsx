@@ -4,82 +4,183 @@ import { FiArrowRight } from "react-icons/fi";
 
 export default function Hero() {
   return (
-    <section className="relative pt-28 pb-16 px-6 overflow-hidden isolate">
-      {/* BACKGROUND LAYERS */}
-      <div className="absolute inset-0 z-0">
-        {/* Image (visible) */}
-        <img
-  src="/2.png"
-  alt=""
-  aria-hidden="true"
-  className="bg-[url(/login background.png)] bg-no-repeat bg-cover"
-  // className="absolute inset-0 h-full w-full object-cover scale-[0.95]"
-  style={{ objectPosition: "50% 100%" }} // keep bottom visible
-/>
+    <section className="relative pt-20 pb-10 px-6 overflow-hidden isolate">
 
-        {/* Radial Gradient Background from Top (your snippet, updated to #736bff) */}
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            background:
-              "radial-gradient(125% 125% at 50% 10%, #fff 40%, #736bff 100%)",
-            opacity: 0.85, // increase = more gradient visible
-          }}
+      {/* BACKGROUND */}
+      <div className="absolute inset-0 -z-10">
+
+        <img
+          src="/2.png"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover scale-[1.015]"
+          style={{ objectPosition: "50% 85%" }}
         />
 
-        {/* This replaces the heavy white overlay (lets image show) */}
-        <div className="absolute inset-0 bg-white/45" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-white/90 via-white/50 to-white/10" />
 
-        {/* Slight top tint so it feels intentional (still minimal) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#736bff]/12 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(55%_35%_at_50%_0%,rgba(115,107,255,0.14),transparent)]" />
 
-        {/* Accent glow */}
-        <div className="pointer-events-none absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#736bff]/22 blur-3xl" />
+        <div className="absolute top-[-160px] left-1/2 -translate-x-1/2 w-[420px] h-[420px] bg-[#736bff]/20 blur-[120px] rounded-full pointer-events-none" />
+
       </div>
+
 
       {/* CONTENT */}
-      <div className="relative z-10 max-w-6xl mx-auto text-center">
-        <div className="inline-flex items-center space-x-2 bg-[#736bff]/10 px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
-          <span className="bg-[#736bff] text-white text-xs font-semibold px-2 py-1 rounded-full">
-            NEW
-          </span>
-          <span className="text-[#736bff] text-sm font-medium">
-            Streamline Campus Life with UniBridge
-          </span>
-        </div>
+      <div className="relative max-w-3xl mx-auto text-center">
 
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-          Bridging Every Part of Campus <br className="hidden sm:block" />
-          <span className="text-5xl text-[#736bff]">Life Seamlessly</span>
+        
+
+
+        {/* HEADLINE */}
+        <h1 className="
+          font-sans
+
+          text-[34px]
+          sm:text-[42px]
+          md:text-[48px]
+
+          font-semibold
+
+          text-gray-900
+
+          leading-[1.1]
+
+          tracking-[-0.02em]
+          mt-10
+          mb-4
+        ">
+
+          Bridging Every Part of Campus
+
+          <br />
+
+          <span className="
+            text-[#736bff]
+            tracking-[-0.015em]
+          ">
+            Life Seamlessly
+          </span>
+
         </h1>
 
-        <p className="text-gray-700 mb-10 leading-relaxed max-w-2xl mx-auto">
-          UniBridge connects people, processes, and progress — empowering
-          institutions to work smarter and grow together.
+
+        {/* DESCRIPTION */}
+        <p className="
+          font-sans
+
+          text-[15px]
+
+          text-gray-600
+
+          leading-[1.6]
+
+          tracking-[-0.005em]
+
+          mb-7
+
+          max-w-lg
+          mx-auto
+        ">
+          UniBridge connects people, processes, and progress —
+          enabling institutions to operate with clarity and efficiency.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-14">
-          <button className="text-sm bg-[#736bff] text-white px-3 py-2 rounded-lg hover:bg-[#5f57e6] transition-all hover:shadow-xl hover:shadow-[#736bff]/30 flex items-center space-x-2 group">
-            <span className="font-semibold">Get Started Free</span>
-            <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+
+        {/* BUTTONS */}
+        <div className="flex items-center justify-center gap-1 mb-9">
+
+          {/* Primary */}
+          <button className="
+            font-sans
+
+            text-[11px]
+            font-medium
+
+            tracking-[0.01em]
+
+            bg-[#736bff]
+            text-white
+
+            px-2 py-1
+
+            rounded-lg
+
+            shadow-sm shadow-[#736bff]/25
+
+            hover:shadow-md hover:shadow-[#736bff]/30
+
+            transition-all duration-200
+
+            flex items-center gap-2
+          ">
+
+            Get Started
+
+            <FiArrowRight className="w-3 h-3" />
+
           </button>
 
-          <button className="text-sm border-2 border-gray-200 bg-white/70 text-gray-900 px-3 py-2 rounded-lg hover:border-[#736bff] hover:text-[#736bff] transition-all backdrop-blur-sm">
-            Explore Dashboard
+
+          {/* Secondary */}
+          <button className="
+            font-sans
+
+            text-[11px]
+            font-medium
+
+            tracking-[0.01em]
+
+            px-2 py-1
+
+            rounded-lg
+
+            bg-white/80
+            backdrop-blur-sm
+
+            border border-gray-200
+
+            hover:border-gray-300
+
+            transition-all duration-200
+          ">
+            Explore
           </button>
+
         </div>
 
-        <div className="relative max-w-4xl mx-auto">
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-0 pointer-events-none" />
-          <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border border-gray-200 bg-white">
+
+        {/* DASHBOARD PREVIEW */}
+        <div className="relative max-w-3xl mx-auto">
+
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none" />
+
+          <div className="
+            relative
+
+            rounded-xl
+
+            overflow-hidden
+
+            border border-gray-200/60
+
+            shadow-[0_12px_40px_rgba(0,0,0,0.08)]
+
+            bg-white
+          ">
+
             <img
               src="/HeroPic.png"
-              alt="UniBridge Dashboard Preview"
-              className="w-full h-auto scale-90 md:scale-95 mx-auto"
+              alt="Dashboard preview"
+              className="w-full h-auto"
             />
+
           </div>
+
         </div>
+
       </div>
+
     </section>
   );
 }

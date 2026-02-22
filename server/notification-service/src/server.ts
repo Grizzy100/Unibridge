@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import notificationRoutes from './routes/notification.routes.js';
 import { connectRabbitMQ, closeRabbitMQ } from './utils/rabbitmq.js';
 import { startAttendanceEventsConsumer } from './consumers/attendance-events.consumer.js';
-import { startOutpassEventsConsumer } from './consumers/outpass-events.js';
+import { startOutpassEventsConsumer } from './consumers/outpass-events.consumer.js';
 import { startTaskEventsConsumer } from './consumers/task-events.consumer.js';
 dotenv.config();
 const app = express();

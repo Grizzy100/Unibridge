@@ -144,79 +144,208 @@ export default function TaskQueue() {
 
   // Success State
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Task Queue</h2>
-            <p className="text-sm text-gray-500 mt-1">Pending assignments</p>
-          </div>
-          <FiClock className="text-gray-400" />
-        </div>
-      </div>
+    <div
+  className="
+  bg-white
+  rounded-2xl
+  border border-gray-200/80
+  shadow-[0_1px_2px_rgba(0,0,0,0.04)]
+  overflow-hidden
+  "
+>
 
-      <div className="max-h-96 overflow-y-auto pb-4">
-        <div className="divide-y divide-gray-100">
-          {tasks.map((task) => {
-            const courseCode = courseMap.get(task.courseId) || 'N/A';
-            const submission = task.submissions?.[0];
-            const dueDate = new Date(submission?.customDueDate || task.dueDate);
-            const dueTime = formatDueTime(dueDate, submission?.status || 'PENDING');
-            const isOverdue = new Date() > dueDate && (!submission || submission.status === 'PENDING');
+  {/* Header */}
+  <div
+    className="
+    flex items-center justify-between
+    px-5 py-4
+    border-b border-gray-200/70
+    "
+  >
 
-            return (
-              <div
-                key={task.id}
-                onClick={() => router.push('/student-dashboard/task')}
-                className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <span className="inline-block px-2.5 py-1 bg-slate-900 text-white text-xs font-bold rounded uppercase">
-                    {courseCode}
-                  </span>
-                  <span className={`text-xs flex items-center gap-1 ${
-                    submission?.status === 'LATE' 
-                      ? 'text-red-600 font-semibold' 
-                      : isOverdue
-                      ? 'text-red-600 font-semibold'
-                      : 'text-gray-500'
-                  }`}>
-                    <FiClock className="text-xs" />
-                    {dueTime}
-                  </span>
-                </div>
+    <div>
 
-                <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-1">
-                  {task.title}
-                </h3>
+      <h2 className="text-[16px] font-semibold text-slate-900">
+        Task Queue
+      </h2>
 
-                <p className="text-xs text-gray-500">
-                  Due: {dueDate.toLocaleString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true
-                  })}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <p className="text-[13px] text-slate-500 mt-0.5">
+        Pending assignments
+      </p>
 
-      <div className="p-4 pb-6 border-t border-gray-200 text-center">
-        <button
-          onClick={() => router.push('/student-dashboard/task')}
-          className="text-sm text-slate-900 hover:text-slate-700 font-medium transition-colors inline-flex items-center gap-1"
-        >
-          View All Tasks
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
     </div>
+
+    <div
+      className="
+      w-8 h-8
+      flex items-center justify-center
+      rounded-lg
+      bg-slate-50
+      text-slate-400
+      "
+    >
+      <FiClock size={15} />
+    </div>
+
+  </div>
+
+
+  {/* Task list */}
+  <div className="divide-y divide-gray-200/70">
+
+    {tasks.map((task) => {
+
+      const courseCode = courseMap.get(task.courseId) || "N/A";
+
+      const submission = task.submissions?.[0];
+
+      const dueDate = new Date(
+        submission?.customDueDate || task.dueDate
+      );
+
+      const dueTime = formatDueTime(
+        dueDate,
+        submission?.status || "PENDING"
+      );
+
+      const isOverdue =
+        new Date() > dueDate &&
+        (!submission || submission.status === "PENDING");
+
+      return (
+
+        <div
+          key={task.id}
+          onClick={() => router.push("/student-dashboard/task")}
+          className="
+          px-5 py-3
+          cursor-pointer
+          hover:bg-slate-50
+          transition-colors
+          "
+        >
+
+          {/* Row */}
+          <div className="flex items-center justify-between gap-3">
+
+            {/* Left */}
+            <div className="min-w-0 flex-1">
+
+              {/* Course */}
+              <div className="flex items-center gap-2 mb-1">
+
+                <span
+                  className="
+                  px-2 py-0.5
+                  rounded-md
+                  bg-slate-900/5
+                  text-slate-700
+                  text-[11px]
+                  font-semibold
+                  "
+                >
+                  {courseCode}
+                </span>
+
+              </div>
+
+              {/* Title */}
+              <p
+                className="
+                text-[14px]
+                font-medium
+                text-slate-900
+                truncate
+                "
+              >
+                {task.title}
+              </p>
+
+              {/* Due date */}
+              <p className="text-[12px] text-slate-500 mt-0.5">
+                Due {dueDate.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </p>
+
+            </div>
+
+
+            {/* Right */}
+            <div
+              className={`
+              flex items-center gap-1.5
+              text-[12px]
+              font-medium
+              whitespace-nowrap
+              ${
+                isOverdue
+                  ? "text-red-600"
+                  : "text-slate-500"
+              }
+              `}
+            >
+              <FiClock size={13} />
+              {dueTime}
+            </div>
+
+          </div>
+
+        </div>
+
+      );
+
+    })}
+
+  </div>
+
+
+  {/* Footer */}
+  <div
+    className="
+    border-t border-gray-200/70
+    px-5 py-3
+    "
+  >
+
+    <button
+      onClick={() =>
+        router.push("/student-dashboard/task")
+      }
+      className="
+      w-full
+      flex items-center justify-center gap-1.5
+      text-[13px]
+      font-medium
+      text-slate-600
+      hover:text-slate-900
+      transition-colors
+      "
+    >
+      View all tasks
+
+      <svg
+        className="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 5l7 7-7 7"
+        />
+      </svg>
+
+    </button>
+
+  </div>
+
+</div>
   );
 }
 

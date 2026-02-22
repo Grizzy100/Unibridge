@@ -175,6 +175,7 @@ type Line = {
 
 export default function WhyUs() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+
   const pillRefs = useRef<Record<PillKey, HTMLDivElement | null>>({
     notifications: null,
     attendance: null,
@@ -264,15 +265,12 @@ export default function WhyUs() {
 
   const [lines, setLines] = useState<Line[]>([]);
 
-  // Elbow controls:
-  // bendOut -> how wide the elbow is
-  // elbowLift -> how high the elbow lifts
   const makeVertex = (x1: number, y1: number, x2: number, y2: number) => {
     const dx = x2 - x1;
     const dy = y2 - y1;
 
-    const bendOut = 95; // elbow width
-    const elbowLift = 30; // elbow lift
+    const bendOut = 95;
+    const elbowLift = 30;
 
     if (Math.abs(dx) < 35) {
       return { vx: x1, vy: y1 - 85 };
@@ -328,9 +326,11 @@ export default function WhyUs() {
       computeLines();
       raf = requestAnimationFrame(loop);
     };
+
     raf = requestAnimationFrame(loop);
 
     const onResize = () => computeLines();
+
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onResize, { passive: true });
 
@@ -339,231 +339,112 @@ export default function WhyUs() {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onResize);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [features]);
 
   return (
-    <section className="relative overflow-hidden py-24 px-6 bg-gradient-to-br from-[#070714] via-[#0d0d25] to-[#0b0b1a]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(115,107,255,0.14)_0%,rgba(0,0,0,0)_52%,rgba(0,0,0,0.74)_100%)]" />
+    <section className="relative overflow-hidden py-24 px-6 bg-gradient-to-br from-[#070714] via-[#0b0b1f] to-[#070714]">
 
-      <div className="pointer-events-none absolute -top-28 left-1/2 h-[460px] w-[460px] -translate-x-1/2 rounded-full bg-[#736bff] opacity-[0.10] blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-44 right-[-160px] h-[560px] w-[560px] rounded-full bg-[#736bff] opacity-[0.08] blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-56 left-[-170px] h-[560px] w-[560px] rounded-full bg-[#736bff] opacity-[0.06] blur-3xl" />
-
-      {/* Orbs: a bit noticeable + back-and-forth (horizontal drift) */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.33]">
-        <span className="orb orb-1" />
-        <span className="orb orb-2" />
-        <span className="orb orb-3" />
-        <span className="orb orb-4" />
-      </div>
+      {/* subtle glow */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(115,107,255,0.10)_0%,rgba(0,0,0,0)_60%)]" />
 
       <div className="relative z-10 mx-auto max-w-6xl">
-        <div className="mx-auto mb-12 max-w-4xl text-center">
-          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-white">
-            Why <span className="text-[#9ab7ff]">Unibridge</span>
+
+        {/* Header */}
+        <div className="mx-auto mb-14 max-w-3xl text-center">
+
+          <h2 className="text-[32px] md:text-[40px] font-semibold tracking-[-0.02em] text-white">
+            Why <span className="text-[#736bff]">UniBridge</span>
           </h2>
-          <p className="mt-5 text-xs md:text-lg leading-relaxed text-white/70">
-            Unibridge turns campus operations into a single, reliable flow—so{" "}
-            <span className="text-white/85">students stay informed</span>,{" "}
-            <span className="text-white/85">teachers act faster</span>,{" "}
-            <span className="text-white/85">wardens approve smoothly</span>, and{" "}
-            <span className="text-white/85">parents stay updated</span>.
-            <span className="text-white/85"> No missed tasks. No buried messages.</span>
+
+          <p className="mt-5 text-[15px] md:text-[16px] leading-[1.65] text-white/60">
+            UniBridge turns campus operations into a single, reliable system —
+            enabling faster execution, structured communication, and full
+            operational clarity across the institution.
           </p>
+
         </div>
 
+        {/* Graph Container */}
         <div className="relative mx-auto max-w-5xl">
+
           <div ref={containerRef} className="relative h-[560px] md:h-[600px]">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(115,107,255,0.12)_0%,rgba(115,107,255,0.05)_30%,rgba(0,0,0,0)_62%)]" />
 
+            {/* center glow */}
+            <div className="absolute left-1/2 top-[340px] w-[520px] h-[260px] -translate-x-1/2 bg-[#736bff]/10 blur-[120px]" />
+
+            {/* SVG lines */}
             <svg
-              className="pointer-events-none absolute inset-0 h-full w-full"
+              className="absolute inset-0 h-full w-full"
               viewBox="0 0 1000 600"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
             >
+
               <defs>
-                <linearGradient id="arcGrad" x1="0" y1="0" x2="1000" y2="600" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#736bff" stopOpacity="0.42" />
-                  <stop offset="50%" stopColor="#736bff" stopOpacity="0.20" />
-                  <stop offset="100%" stopColor="#736bff" stopOpacity="0.34" />
+
+                <linearGradient id="lineGrad" x1="0" y1="0" x2="1000" y2="600">
+                  <stop offset="0%" stopColor="#736bff" stopOpacity="0.18"/>
+                  <stop offset="50%" stopColor="#736bff" stopOpacity="0.55"/>
+                  <stop offset="100%" stopColor="#736bff" stopOpacity="0.18"/>
                 </linearGradient>
 
-                {/* line color control: adjust these stopOpacity values to make wires brighter/dimmer */}
-                <linearGradient id="lineGrad" x1="0" y1="0" x2="1000" y2="600" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#736bff" stopOpacity="0.08" />
-                  <stop offset="45%" stopColor="#736bff" stopOpacity="0.34" />
-                  <stop offset="100%" stopColor="#736bff" stopOpacity="0.14" />
-                </linearGradient>
-
-                <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3.5" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
               </defs>
 
-              <path d="M 190 480 Q 500 140 810 480" stroke="url(#arcGrad)" strokeWidth="1.4" opacity="0.68" />
-              <path d="M 245 512 Q 500 220 755 512" stroke="url(#arcGrad)" strokeWidth="1.25" opacity="0.52" />
-              <path d="M 300 545 Q 500 300 700 545" stroke="url(#arcGrad)" strokeWidth="1.15" opacity="0.38" />
-
               {lines.map((l) => (
-                <g key={l.key}>
-                  <polyline
-                    points={`${l.x1},${l.y1} ${l.vx},${l.vy} ${l.x2},${l.y2}`}
-                    stroke="url(#lineGrad)"
-                    strokeWidth="1.2"
-                    opacity="0.95"
-                    fill="none"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  />
-                  <g filter="url(#softGlow)">
-                    <circle cx={l.x1} cy={l.y1} r="3.8" fill="#736bff" fillOpacity="0.88" />
-                    <circle cx={l.x1} cy={l.y1} r="12" fill="#736bff" fillOpacity="0.12" />
-                  </g>
-                </g>
+                <polyline
+                  key={l.key}
+                  points={`${l.x1},${l.y1} ${l.vx},${l.vy} ${l.x2},${l.y2}`}
+                  stroke="url(#lineGrad)"
+                  strokeWidth="1.2"
+                  fill="none"
+                />
               ))}
+
             </svg>
 
-            <div className="relative h-full w-full">
-              {features.map((feature) => (
+            {/* Pills */}
+            {features.map((feature) => (
+
+              <div
+                key={feature.key}
+                className={`absolute animate-float ${feature.className}`}
+                style={{
+                  animationDelay: feature.delay,
+                  ["--dur" as any]: feature.duration,
+                  ["--drift" as any]: `${feature.drift}px`,
+                }}
+              >
+
                 <div
-                  key={feature.key}
-                  className={`absolute animate-float ${feature.className}`}
-                  style={
-                    {
-                      animationDelay: feature.delay,
-                      ["--dur" as any]: feature.duration ?? "5.1s",
-                      ["--drift" as any]: `${feature.drift ?? 1}px`,
-                    } as React.CSSProperties
-                  }
-                >
-                  <div
-                    ref={(el) => {
-                      pillRefs.current[feature.key] = el;
-                    }}
-                    className={[
-                      "inline-flex items-center gap-3 rounded-full",
-                      feature.variant === "primary" ? "px-7 py-3.5" : "px-6 py-3",
-                      "bg-white/[0.06] backdrop-blur-xl",
-                      "ring-1 ring-white/10",
-                      "shadow-[0_10px_30px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.14)]",
-                      "transition-all hover:bg-white/[0.085] hover:ring-white/15",
-                    ].join(" ")}
-                  >
-                    <span
-                      className={[
-                        "whitespace-nowrap font-medium",
-                        feature.variant === "primary"
-                          ? "text-sm md:text-[15px] text-white/92"
-                          : "text-sm text-white/88",
-                      ].join(" ")}
-                    >
-                      {feature.text}
-                    </span>
+  ref={(el) => pillRefs.current[feature.key] = el}
+  className="inline-flex items-center gap-3 px-6 py-3 bg-white/[0.04] backdrop-blur-md border border-white/10 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.45)] text-[13.5px] tracking-[-0.01em] text-white/85"
+>
 
-                    <span className="opacity-95">{feature.icon}</span>
+                  {feature.icon}
+                  {feature.text}
 
-                    <span className="ml-1 h-2 w-2 rounded-full bg-[#736bff]/85 shadow-[0_0_0_6px_rgba(115,107,255,0.12)]" />
-                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="pointer-events-none absolute -bottom-10 left-1/2 h-24 w-[92%] -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(115,107,255,0.16)_0%,rgba(0,0,0,0)_65%)] blur-2xl" />
+              </div>
+
+            ))}
+
           </div>
+
         </div>
+
       </div>
 
       <style jsx>{`
         @keyframes floaty {
-          0% {
-            transform: translate3d(0, 0, 0);
-          }
-          50% {
-            transform: translate3d(var(--drift, 1px), -8px, 0);
-          }
-          100% {
-            transform: translate3d(0, 0, 0);
-          }
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+          100% { transform: translateY(0px); }
         }
+
         .animate-float {
-          animation: floaty var(--dur, 5.1s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
-          will-change: transform;
-        }
-
-        .orb {
-          position: absolute;
-          width: 260px;
-          height: 260px;
-          border-radius: 9999px;
-          background: radial-gradient(
-            circle at 30% 30%,
-            rgba(115, 107, 255, 0.26),
-            rgba(115, 107, 255, 0.10) 42%,
-            rgba(115, 107, 255, 0) 72%
-          );
-          filter: blur(16px);
-          opacity: 0.75;
-          animation: orbSide 12s ease-in-out infinite;
-        }
-
-        .orb-1 {
-          top: 10%;
-          left: 8%;
-          animation-duration: 14s;
-        }
-        .orb-2 {
-          top: 16%;
-          right: 7%;
-          width: 300px;
-          height: 300px;
-          animation-duration: 16s;
-          animation-delay: -4s;
-        }
-        .orb-3 {
-          bottom: 14%;
-          left: 20%;
-          width: 280px;
-          height: 280px;
-          animation-duration: 18s;
-          animation-delay: -7s;
-        }
-        .orb-4 {
-          bottom: 10%;
-          right: 16%;
-          width: 320px;
-          height: 320px;
-          animation-duration: 20s;
-          animation-delay: -10s;
-        }
-
-        /* back-and-forth motion (horizontal) + slight vertical breathing */
-        @keyframes orbSide {
-          0% {
-            transform: translate3d(-18px, 0px, 0) scale(1);
-          }
-          50% {
-            transform: translate3d(18px, -10px, 0) scale(1.05);
-          }
-          100% {
-            transform: translate3d(-18px, 0px, 0) scale(1);
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .animate-float {
-            animation: none;
-          }
-          .orb {
-            animation: none;
-          }
+          animation: floaty var(--dur, 5s) ease-in-out infinite;
         }
       `}</style>
+
     </section>
   );
 }

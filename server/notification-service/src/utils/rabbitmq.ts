@@ -1,5 +1,5 @@
 
-//server/notification-service/src/utils/rabbitmq.ts
+// //server/notification-service/src/utils/rabbitmq.ts
 import amqp from 'amqplib';
 let connection: any = null;
 let channel: any = null;
@@ -82,3 +82,7 @@ export async function closeRabbitMQ(): Promise<void> {
     console.error('Error closing RabbitMQ:', error);
   }
 }
+
+
+
+

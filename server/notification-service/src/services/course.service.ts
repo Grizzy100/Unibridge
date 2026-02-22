@@ -6,8 +6,14 @@ export async function getEnrolledStudents(courseId: string): Promise<any[]> {
   try {
     const response = await axios.get(
       `${USER_SERVICE_URL}/api/courses/${courseId}/enrollments`,
-      { timeout: 5000 }
+      {
+        timeout: 10000,
+        headers: {
+          'x-service-key': process.env.NOTIFICATION_SERVICE_KEY,
+        },
+      }
     );
+
     
     return response.data?.data || [];
   } catch (error: any) {

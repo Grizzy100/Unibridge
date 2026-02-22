@@ -9,35 +9,40 @@ const router = Router();
 router.get(
   '/my',
   authenticate,
-  authorize('STUDENT'),
+  authorize('STUDENT', 'WARDEN', 'TEACHER')
+,
   notificationCtrl.getMyNotifications
 );
 // Get unread count
 router.get(
   '/unread-count',
   authenticate,
-  authorize('STUDENT'),
+  authorize('STUDENT', 'WARDEN', 'TEACHER')
+,
   notificationCtrl.getUnreadCount
 );
 // Mark single notification as read
 router.patch(
   '/:id/read',
   authenticate,
-  authorize('STUDENT'),
+  authorize('STUDENT', 'WARDEN', 'TEACHER')
+,
   notificationCtrl.markAsRead
 );
 // Mark all as read
 router.patch(
   '/read-all',
   authenticate,
-  authorize('STUDENT'),
+  authorize('STUDENT', 'WARDEN', 'TEACHER')
+,
   notificationCtrl.markAllAsRead
 );
 // Delete notification
 router.delete(
   '/:id',
   authenticate,
-  authorize('STUDENT'),
+  authorize('STUDENT', 'WARDEN', 'TEACHER')
+,
   notificationCtrl.deleteNotification
 );
 export default router;
