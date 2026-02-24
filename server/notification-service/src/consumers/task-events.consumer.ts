@@ -30,24 +30,29 @@ export async function startTaskEventsConsumer() {
 }
 async function handleTaskCreated(data: any) {
   console.log('📝 Processing task created:', data);
-  const { taskId, courseId, title, description, dueDate, maxMarks } = data;
+  const { taskId, courseId, courseName, courseCode, title, description, dueDate, maxMarks } = data;
+
+  // Build display name — falls back gracefully for older events without course info
+  const displayCourseName = courseName && courseCode
+    ? `${courseName} (${courseCode})`
+    : courseName || courseId;
   const enrollments = await getEnrolledStudents(courseId);
   if (!enrollments || enrollments.length === 0) {
     console.log('No students enrolled in this course');
     return;
   }
-  for (const enrollment of enrollments) {
-    try {
-      const studentUserId = enrollment.student.userId;
+  const results = await Promise.allSettled(
+    enrollments.map(async (enrollment) => {
+      const studentUserId = enrollment.student?.userId;
       if (!studentUserId) {
         console.error(`Student userId not found for enrollment: ${enrollment.id}`);
-        continue;
+        return;
       }
       await createNotification(
         studentUserId,
         'TASK_CREATED',
-        '📝 New Task Assigned',
-        `${title} - Due: ${new Date(dueDate).toLocaleDateString('en-IN', {
+        'New Task Assigned',
+        `${displayCourseName}: ${title} — Due: ${new Date(dueDate).toLocaleDateString('en-IN', {
           day: 'numeric',
           month: 'short',
           year: 'numeric',
@@ -57,15 +62,20 @@ async function handleTaskCreated(data: any) {
         {
           taskId,
           courseId,
+          courseName,
+          courseCode,
           title,
           description,
           dueDate,
           maxMarks,
         }
       );
-    } catch (error) {
-      console.error(`Failed to create notification for student ${enrollment.studentId}:`, error);
-    }
+    })
+  );
+
+  const failed = results.filter((r) => r.status === 'rejected');
+  if (failed.length > 0) {
+    console.error(`⚠️ ${failed.length} notification(s) failed:`, failed.map((r: any) => r.reason?.message));
   }
   console.log(`✅ Task created notifications sent to ${enrollments.length} students`);
 }
@@ -81,8 +91,7 @@ async function handleTaskGraded(data: any) {
     student.userId,
     'TASK_GRADED',
     '✅ Task Graded',
-    `Your submission for "${taskTitle}" has been graded: ${marks}/5${
-      feedback ? ` - ${feedback}` : ''
+    `Your submission for "${taskTitle}" has been graded: ${marks}/5${feedback ? ` - ${feedback}` : ''
     }`,
     {
       taskId,

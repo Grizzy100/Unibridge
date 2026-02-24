@@ -1,7 +1,8 @@
-//client/arc/app/(dashboard)/parent-dashboard/components/Navbar.tsx
+//client/src/app/(dashboard)/parent-dashboard/components/Navbar.tsx
 'use client';
 
-import { FiSearch, FiBell, FiUser } from 'react-icons/fi';
+import { FiSearch, FiUser } from 'react-icons/fi';
+import NotificationBell from '../../../../../components/NotificationBell';
 
 export default function Navbar() {
   return (
@@ -20,10 +21,7 @@ export default function Navbar() {
 
       {/* Right Side */}
       <div className="flex items-center gap-4 ml-6">
-        <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-          <FiBell className="text-xl" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
+        <NotificationBell />
 
         <button className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
           <div className="w-8 h-8 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full flex items-center justify-center">

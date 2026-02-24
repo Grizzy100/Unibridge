@@ -12,6 +12,29 @@ interface ParentInfo {
   lastName: string;
   relationship: string;
 }
+interface CourseDetails {
+  id: string;
+  courseName: string;
+  courseCode: string;
+}
+/**
+ * Fetch course details from user-service using the request token.
+ * Returns null on any error so callers can gracefully fall back.
+ */
+async function getCourseDetails(courseId: string, token?: string): Promise<CourseDetails | null> {
+  try {
+    const headers: any = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const response = await axios.get(
+      `${USER_SERVICE_URL}/api/courses/${courseId}`,
+      { timeout: 5000, headers }
+    );
+    return response.data?.data ?? null;
+  } catch (error: any) {
+    console.error('Error fetching course details:', error.message);
+    return null;
+  }
+}
 /**
  * Fetch parent details for a student from user-service
  */
@@ -24,7 +47,7 @@ async function getStudentParents(studentId: string, token?: string): Promise<Par
       { timeout: 5000, headers }
     );
     const links = response.data.data || [];
-    
+
     // Map to parent info with email from User model
     return links.map((link: any) => ({
       userId: link.parent.userId,
@@ -50,10 +73,17 @@ export async function checkAndPublishLowAttendanceAlert(
     const stats = await calculateAttendancePercentage(studentId, courseId, token);
     const LOW_THRESHOLD = 60;
     if (stats.percentage < LOW_THRESHOLD) {
-      const parents = await getStudentParents(studentId, token);
+      // Fetch course details and parents concurrently
+      const [course, parents] = await Promise.all([
+        getCourseDetails(courseId, token),
+        getStudentParents(studentId, token),
+      ]);
+
       const eventData = {
         studentId,
         courseId,
+        courseName: course?.courseName,
+        courseCode: course?.courseCode,
         percentage: stats.percentage,
         totalClasses: stats.total,
         attendedClasses: stats.present,
@@ -67,7 +97,7 @@ export async function checkAndPublishLowAttendanceAlert(
         }))
       };
       await publishEvent('attendance.alert.low', eventData);
-      console.log(`🚨 Low attendance alert published for student ${studentId} in course ${courseId}`);
+      console.log(`🚨 Low attendance alert published for student ${studentId} in course ${course?.courseName ?? courseId}`);
     }
   } catch (error: any) {
     console.error('Error checking low attendance:', error.message);

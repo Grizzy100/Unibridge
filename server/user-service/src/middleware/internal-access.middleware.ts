@@ -1,4 +1,4 @@
-//server\user-service\src\middleware\service.middleware.ts
+//server/user-service/src/middleware/internal-access.middleware.ts
 import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
 
@@ -12,6 +12,7 @@ type JwtPayload = {
   role?: string
 }
 
+/** Service key  OR  admin JWT */
 export function requireServiceOrAdmin(req: Request, res: Response, next: NextFunction) {
   const serviceKey = req.headers["x-service-key"]
 
@@ -31,20 +32,40 @@ export function requireServiceOrAdmin(req: Request, res: Response, next: NextFun
 
   try {
     const payload = jwt.verify(token, JWT_SECRET) as JwtPayload
-
     if (payload.role !== "ADMIN") {
-      return res.status(403).json({
-        success: false,
-        message: "Forbidden"
-      })
+      return res.status(403).json({ success: false, message: "Forbidden" })
     }
-
     return next()
   } catch (e) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token"
-    })
+    return res.status(401).json({ success: false, message: "Invalid token" })
   }
 }
 
+/** Service key  OR  ANY valid JWT (any role).
+ *  Use this for routes that internal services AND regular users both need.
+ */
+export function requireServiceOrAnyUser(req: Request, res: Response, next: NextFunction) {
+  const serviceKey = req.headers["x-service-key"]
+
+  // Internal service — accept via key
+  if (SERVICE_KEY && typeof serviceKey === "string" && serviceKey === SERVICE_KEY) {
+    return next()
+  }
+
+  // Regular user — any valid JWT role
+  const auth = req.headers.authorization
+  if (!auth || !auth.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      message: "Missing Authorization or X-Service-Key"
+    })
+  }
+
+  const token = auth.split(" ")[1]
+  try {
+    jwt.verify(token, JWT_SECRET) // validate only, no role check
+    return next()
+  } catch (e) {
+    return res.status(401).json({ success: false, message: "Invalid token" })
+  }
+}

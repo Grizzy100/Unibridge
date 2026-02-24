@@ -4,6 +4,7 @@ import { Router } from 'express';
 import * as courseCtrl from '../controllers/course.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { authorize } from '../middleware/role.middleware.js';
+import { requireServiceOrAdmin, requireServiceOrAnyUser } from '../middleware/internal-access.middleware.js';
 const router = Router();
 // ==================== ADMIN ONLY ROUTES ====================
 // Course management
@@ -65,10 +66,10 @@ router.get(
   authenticate,
   courseCtrl.getAllCourses
 );
-// Get single course
+// Get single course — accepts service key OR any authenticated user
 router.get(
   '/courses/:id',
-  authenticate,
+  requireServiceOrAnyUser,
   courseCtrl.getCourseById
 );
 // Get courses for a teacher
@@ -96,5 +97,5 @@ router.get(
 //   courseCtrl.getCourseEnrollments
 // );
 
-router.get('/courses/:courseId/enrollments', authenticate, authorize('ADMIN','TEACHER'), courseCtrl.getCourseEnrollments);
+router.get('/courses/:courseId/enrollments', requireServiceOrAdmin, courseCtrl.getCourseEnrollments);
 export default router;

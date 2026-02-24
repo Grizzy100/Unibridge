@@ -49,7 +49,7 @@ async function verifyTeacherCourse(teacherId: string, courseId: string, token?: 
       headers,
     });
     const courses = response.data.data || [];
-    console.log(`[DEBUG] Teacher ${teacherId} teaches these courses:`, courses.map((c:any) => c.id));
+    console.log(`[DEBUG] Teacher ${teacherId} teaches these courses:`, courses.map((c: any) => c.id));
     return courses.some((course: any) => course.id === courseId);
   } catch (error: any) {
     console.error('Error verifying teacher course:', error.message);
@@ -107,7 +107,7 @@ export async function startSession(
       console.warn(`⚠️ No students enrolled in course ${data.courseId}`);
     } else {
       console.log(`[DEBUG] Creating AttendanceRecords for ${students.length} students`);
-      
+
       await prisma.attendanceRecord.createMany({
         data: students.map((student: any) => {
           const usedId = student.id || student.userId;
@@ -228,7 +228,7 @@ export async function createAttendanceSession(
   if (students.length === 0) {
     console.warn(`No students enrolled in course ${data.courseId}`);
   } else {
-    console.log(`[DEBUG] Creating AttendanceRecords for these studentIds:`, students.map((s:any) => s.id || s.userId));
+    console.log(`[DEBUG] Creating AttendanceRecords for these studentIds:`, students.map((s: any) => s.id || s.userId));
   }
   if (students.length > 0) {
     await prisma.attendanceRecord.createMany({
@@ -291,7 +291,27 @@ export async function expireSession(sessionId: string, teacherId: string) {
   });
 }
 
-
+/**
+ * Background cleanup: marks all ACTIVE sessions whose 1-hour window
+ * has passed as EXPIRED. Wire this to a setInterval every 5 minutes.
+ */
+export async function cleanupExpiredSessions(): Promise<void> {
+  try {
+    const now = new Date();
+    const { count } = await prisma.attendanceSession.updateMany({
+      where: {
+        status: 'ACTIVE',
+        sessionEndTime: { lt: now },
+      },
+      data: { status: 'EXPIRED' },
+    });
+    if (count > 0) {
+      console.log(`⏰ Auto-expired ${count} attendance session(s)`);
+    }
+  } catch (error: any) {
+    console.error('Error in cleanupExpiredSessions:', error.message);
+  }
+}
 
 
 

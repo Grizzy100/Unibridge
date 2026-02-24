@@ -32,29 +32,29 @@ export async function createTask(
 ) {
   try {
     const prisma = getPrisma();
-    
+
     console.log('Creating task for teacher:', teacherUserId);
-    
+
     const courses = await getTeacherCourses(teacherUserId, token);
-    
+
     if (courses.length === 0) {
       throw new Error('You are not assigned to any courses');
     }
 
     const courseExists = courses.some(course => course.id === data.courseId);
-    
+
     if (!courseExists) {
       throw new Error('You are not assigned to this course');
     }
 
     const targetCourse = courses.find(course => course.id === data.courseId);
-    
+
     if (!targetCourse) {
       throw new Error('Course not found in teacher assignments');
     }
 
     const teacherId = targetCourse.teacher?.id || targetCourse.teacherId;
-    
+
     if (!teacherId) {
       throw new Error('Teacher ID not found in course data');
     }
@@ -85,7 +85,7 @@ export async function createTask(
         dueDate: task.dueDate,
         maxMarks: task.maxMarks,
       });
-      
+
       console.log('Task creation event published');
     } catch (eventError) {
       console.error('Failed to publish task.created event:', eventError);
@@ -101,16 +101,16 @@ export async function createTask(
 export async function getCourseTasks(courseId: string) {
   try {
     const prisma = getPrisma();
-    
+
     console.log('Fetching tasks for course:', courseId);
-    
+
     const tasks = await prisma.task.findMany({
       where: { courseId },
       orderBy: { dueDate: 'asc' },
     });
-    
+
     console.log(`Found ${tasks.length} tasks for course`);
-    
+
     return tasks;
   } catch (error) {
     console.error('Error fetching course tasks:', error);
@@ -121,7 +121,7 @@ export async function getCourseTasks(courseId: string) {
 export async function getStudentTasks(studentUserId: string, token?: string) {
   try {
     const prisma = getPrisma();
-    
+
     console.log('Fetching tasks for student user:', studentUserId);
 
     // ✅ Step 1: Get ProfileId from UserId (for database queries)
@@ -143,7 +143,7 @@ export async function getStudentTasks(studentUserId: string, token?: string) {
     }
 
     const courseIds = courses.map(course => course.id);
-    
+
     console.log('Fetching tasks for courses:', courseIds);
 
     const tasks = await prisma.task.findMany({
@@ -190,7 +190,7 @@ export async function extendTaskForAll(
 ) {
   try {
     const prisma = getPrisma();
-    
+
     console.log('Extending task deadline:', taskId);
 
     const task = await prisma.task.findUnique({
@@ -228,7 +228,7 @@ export async function extendTaskForAll(
 export async function getTaskById(taskId: string) {
   try {
     const prisma = getPrisma();
-    
+
     console.log('Fetching task by ID:', taskId);
 
     const task = await prisma.task.findUnique({

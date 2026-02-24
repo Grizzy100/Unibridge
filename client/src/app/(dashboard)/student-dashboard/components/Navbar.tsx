@@ -115,18 +115,7 @@ export default function Navbar() {
       <div className="flex items-center gap-3 ml-6">
 
         {/* Notification */}
-        <div
-          className="
-          flex items-center justify-center
-          w-10 h-10
-          rounded-xl
-          hover:bg-slate-100
-          transition-colors
-          cursor-pointer
-          "
-        >
-          <NotificationBell />
-        </div>
+        <NotificationBell />
 
 
         {/* Avatar */}

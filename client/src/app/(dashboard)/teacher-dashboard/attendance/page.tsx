@@ -1,20 +1,35 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import toast from "react-hot-toast"
-import { teacherApi, AttendanceSession } from "../../../../../lib/teacherApi"
+import { teacherApi, AttendanceSession, TeacherCourse } from "../../../../../lib/teacherApi"
 import LoadingScreen from "../components/common/LoadingScreen"
 
 export default function TeacherAttendancePage() {
   const [loading, setLoading] = useState(true)
   const [sessions, setSessions] = useState<AttendanceSession[]>([])
+  const [courses, setCourses] = useState<TeacherCourse[]>([])
   const [stats, setStats] = useState<Record<string, any>>({})
+
+  // ✅ Build a fast courseId → display name map from the teacher's own courses
+  const courseLabel = useMemo(() => {
+    const map: Record<string, string> = {}
+    for (const c of courses) {
+      map[c.id] = `${c.courseName} (${c.courseCode})`
+    }
+    return map
+  }, [courses])
 
   async function load() {
     try {
       setLoading(true)
-      const list = await teacherApi.attendance.mySessions()
+      // Fetch sessions and courses in parallel
+      const [list, myCourses] = await Promise.all([
+        teacherApi.attendance.mySessions(),
+        teacherApi.courses.my(),
+      ])
       setSessions(list)
+      setCourses(myCourses)
     } catch (e: any) {
       toast.error(e.message || "Failed to load sessions")
     } finally {
@@ -63,20 +78,21 @@ export default function TeacherAttendancePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {sessions.map((s) => {
             const stat = stats[s.id]
+            // ✅ Resolve human-readable name — fallback to raw ID only if course isn't found
+            const displayName = courseLabel[s.courseId] ?? s.courseId
             return (
               <div key={s.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900">{s.courseId}</p>
+                    <p className="text-sm font-bold text-slate-900">{displayName}</p>
                     <p className="text-xs text-slate-500 mt-1">
                       {new Date(s.createdAt).toLocaleString("en-IN")}
                     </p>
                     <span
-                      className={`inline-flex mt-3 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
-                        s.status === "ACTIVE"
+                      className={`inline-flex mt-3 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${s.status === "ACTIVE"
                           ? "bg-green-50 text-green-700 border-green-100"
                           : "bg-slate-50 text-slate-700 border-slate-200"
-                      }`}
+                        }`}
                     >
                       {s.status}
                     </span>
@@ -108,7 +124,7 @@ export default function TeacherAttendancePage() {
                     <Stat label="Absent" value={stat.absent} />
                   </div>
                 ) : (
-                  <div className="mt-5 text-xs text-slate-500">Click “Stats” to load summary.</div>
+                  <div className="mt-5 text-xs text-slate-500">Click "Stats" to load summary.</div>
                 )}
               </div>
             )

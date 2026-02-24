@@ -3,6 +3,7 @@
 import { consumeEvents } from '../utils/rabbitmq.js';
 import { createNotification } from '../services/notification.service.js';
 import { sendLowAttendanceEmail, sendWeeklySummaryEmail } from '../services/email.service.js';
+
 export async function startAttendanceEventsConsumer() {
   const queueName = 'notification.attendance.queue';
   const routingKeys = [
@@ -21,47 +22,61 @@ export async function startAttendanceEventsConsumer() {
     }
   });
 }
+
 async function handleLowAttendanceAlert(data: any) {
   console.log('📉 Processing low attendance alert:', data);
   const {
     studentId,
     courseId,
+    courseName,
+    courseCode,
     percentage,
     totalClasses,
     attendedClasses,
     absentClasses,
     parents
   } = data;
-  // Create in-app notification for student
+
+  // Build display name — falls back to courseId for legacy events without course info
+  const displayCourseName = courseName && courseCode
+    ? `${courseName} (${courseCode})`
+    : courseName || courseId;
+
   await createNotification(
     studentId,
     'ATTENDANCE_LOW',
     '⚠️ Low Attendance Alert',
-    `Your attendance in course ${courseId} has dropped to ${percentage}%. You have attended ${attendedClasses} out of ${totalClasses} classes.`,
+    `Your attendance in ${displayCourseName} has dropped to ${percentage}%. You have attended ${attendedClasses} out of ${totalClasses} classes.`,
     {
       courseId,
+      courseName,
+      courseCode,
       percentage,
       totalClasses,
       attendedClasses,
       absentClasses
     }
   );
+
   // Send email to parents
   if (parents && parents.length > 0) {
-    for (const parent of parents) {
-      await sendLowAttendanceEmail(
-        parent.email,
-        parent.name,
-        'Student', // You can enhance this by fetching student name from user-service
-        courseId,
-        percentage,
-        totalClasses,
-        attendedClasses
-      );
-    }
+    await Promise.allSettled(
+      parents.map((parent: any) =>
+        sendLowAttendanceEmail(
+          parent.email,
+          parent.name,
+          'Student',
+          displayCourseName,
+          percentage,
+          totalClasses,
+          attendedClasses
+        )
+      )
+    );
   }
   console.log('✅ Low attendance alert processed');
 }
+
 async function handleWeeklySummary(data: any) {
   console.log('📊 Processing weekly summary:', data);
   const {
@@ -75,7 +90,7 @@ async function handleWeeklySummary(data: any) {
     weekEnd,
     parents
   } = data;
-  // Create in-app notification for student
+
   await createNotification(
     studentId,
     'WEEKLY_SUMMARY',
@@ -91,20 +106,22 @@ async function handleWeeklySummary(data: any) {
       weekEnd
     }
   );
-  // Send email to parents
+
   if (parents && parents.length > 0) {
-    for (const parent of parents) {
-      await sendWeeklySummaryEmail(
-        parent.email,
-        parent.name,
-        'Student', // You can enhance this by fetching student name from user-service
-        overallPercentage,
-        totalCourses,
-        totalClassesThisWeek,
-        attendedThisWeek,
-        courseWiseStats
-      );
-    }
+    await Promise.allSettled(
+      parents.map((parent: any) =>
+        sendWeeklySummaryEmail(
+          parent.email,
+          parent.name,
+          'Student',
+          overallPercentage,
+          totalCourses,
+          totalClassesThisWeek,
+          attendedThisWeek,
+          courseWiseStats
+        )
+      )
+    );
   }
   console.log('✅ Weekly summary processed');
 }

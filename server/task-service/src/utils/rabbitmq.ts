@@ -34,8 +34,7 @@ export async function publishEvent(
   data: any
 ): Promise<void> {
   if (!channel) {
-    console.error('RabbitMQ channel not initialized');
-    return;
+    throw new Error('RabbitMQ channel not initialized — cannot publish event');
   }
   try {
     const message = JSON.stringify(data);

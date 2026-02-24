@@ -8,6 +8,7 @@ import attendanceRoutes from './routes/attendance.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import { connectRabbitMQ, closeRabbitMQ } from './utils/rabbitmq.js';
 import { startWeeklySummaryCron } from './jobs/weekly-summary.job.js';
+import { cleanupExpiredSessions } from './services/session.service.js';
 
 dotenv.config();
 const app = express();
@@ -26,6 +27,12 @@ app.get('/health', (req, res) => {
 });
 connectRabbitMQ().catch(console.error);
 startWeeklySummaryCron();
+
+// ✅ Auto-expire sessions whose 1-hour window has passed
+// Runs on startup and every 5 minutes
+cleanupExpiredSessions().catch(console.error);
+setInterval(() => cleanupExpiredSessions().catch(console.error), 5 * 60 * 1000);
+
 process.on('SIGINT', async () => {
   console.log('Shutting down gracefully...');
   await closeRabbitMQ();
