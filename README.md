@@ -203,32 +203,6 @@ Multiple iterations were needed before arriving at a model that correctly separa
 
 ---
 
-## 📁 Repository Structure
-
-```
-Unibridge/
-├── client/                       # Next.js frontend
-│   ├── app/
-│   │   ├── (auth)/               # Login, signup, role selection
-│   │   ├── (dashboard)/
-│   │   │   ├── student/          # Feed, attendance, outpass, assignments
-│   │   │   ├── faculty/          # Attendance sessions, assignments, mail
-│   │   │   ├── warden/           # Outpass approval queue
-│   │   │   └── parent/           # Outpass approvals, notifications
-│   │   └── mail/                 # Categorized academic inbox
-│   └── lib/
-│       └── api/                  # Typed API client functions per service
-│
-└── server/
-    ├── user-service/             # Auth, profiles, roles
-    ├── attendance-service/       # QR generation, session management, marking
-    ├── outpass-service/          # Multi-level approval workflow
-    ├── assignment-service/       # Deadlines, submissions, notifications
-    └── mail-service/             # Categorized academic mailing
-```
-
----
-
 ## ⚠️ Engineering Challenges Solved
 
 ### 🔄 Breaking ORM Upgrade Mid-Development
