@@ -88,37 +88,3 @@ router.get(
 );
 
 export default router;
-
-
-
-
-
-// import { Router } from 'express';
-// import * as sessionCtrl from '../controllers/session.controller.js';
-// import { authenticate } from '../middleware/auth.middleware.js';
-// import { authorize } from '../middleware/role.middleware.js';
-// const router = Router();
-// router.post(
-//   '/',
-//   authenticate,
-//   authorize('TEACHER'),
-//   sessionCtrl.createSession
-// );
-// router.get(
-//   '/my',
-//   authenticate,
-//   authorize('TEACHER'),
-//   sessionCtrl.getTeacherSessions
-// );
-// router.get(
-//   '/:id',
-//   authenticate,
-//   sessionCtrl.getSessionById
-// );
-// router.patch(
-//   '/:id/expire',
-//   authenticate,
-//   authorize('TEACHER'),
-//   sessionCtrl.expireSession
-// );
-// export default router;

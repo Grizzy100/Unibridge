@@ -1,24 +1,3 @@
-
-//server/attendance-service/src/validators/session.validator.ts
-// import { z } from 'zod';
-// export const createSessionSchema = z.object({
-//   courseId: z.string().min(1, 'Course ID is required'),
-//   sessionStartTime: z.string().refine(val => !isNaN(Date.parse(val)), {
-//     message: 'Invalid session start time format'
-//   }),
-//   sessionEndTime: z.string().refine(val => !isNaN(Date.parse(val)), {
-//     message: 'Invalid session end time format'
-//   }),
-//   location: z.string().optional(),
-//   remarks: z.string().max(500).optional(),
-//   qrValidityMinutes: z.number().min(0.5).max(60).optional().default(0.5) // <-- changed min from 1 to 0.5, default is now 0.5
-// }).refine(data => new Date(data.sessionEndTime) > new Date(data.sessionStartTime), {
-//   message: 'Session end time must be after start time'
-// });
-// export type CreateSessionInput = z.infer<typeof createSessionSchema>;
-
-
-
 //server/attendance-service/src/validators/session.validator.ts
 import { z } from 'zod';
 
