@@ -18,7 +18,12 @@ export default function TaskCard({ task, courseCode, onRefresh }: TaskCardProps)
   const status = submission?.status || 'PENDING';
 
   const getTimeRemaining = () => {
-    const dueDate = new Date(submission?.customDueDate || task.dueDate);
+    // Already actioned — show status text, not a stale timer
+    if (status === 'SUBMITTED' || status === 'GRADED') return 'Submitted';
+    if (status === 'LATE') return 'Submitted late';
+    if (status === 'RESUBMITTING') return 'Awaiting resubmission';
+
+    const dueDate = new Date(task.dueDate);
     const now = new Date();
     const diff = dueDate.getTime() - now.getTime();
 

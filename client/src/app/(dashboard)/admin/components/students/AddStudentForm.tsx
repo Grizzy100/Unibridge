@@ -370,45 +370,53 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
               </div>
             </details>
 
-            <details className="border-t pt-6">
-              <summary className="text-sm font-semibold text-gray-900 cursor-pointer hover:text-gray-700 select-none">
-                Hostel Information (Optional)
-              </summary>
-              <div className="mt-3 space-y-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="hostelAssigned"
-                    checked={formData.hostelAssigned}
-                    onChange={(e) => handleChange('hostelAssigned', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300"
-                  />
-                  <label htmlFor="hostelAssigned" className="text-sm text-gray-700">
-                    Hostel Assigned
-                  </label>
-                </div>
-                {formData.hostelAssigned && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs text-gray-600 mb-1.5 block">Hostel Name</Label>
-                      <Input
-                        placeholder="Hostel Name"
-                        value={formData.hostelName}
-                        onChange={(e) => handleChange('hostelName', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-gray-600 mb-1.5 block">Room Number</Label>
-                      <Input
-                        placeholder="Room Number"
-                        value={formData.roomNumber}
-                        onChange={(e) => handleChange('roomNumber', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                )}
+            <div className="border-t pt-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Student Type *</h3>
+              <div className="flex gap-3 mb-4">
+                <button
+                  type="button"
+                  onClick={() => handleChange('hostelAssigned', false)}
+                  className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                    !formData.hostelAssigned
+                      ? 'bg-slate-900 text-white border-slate-900'
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  🏠 Day Scholar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleChange('hostelAssigned', true)}
+                  className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                    formData.hostelAssigned
+                      ? 'bg-slate-900 text-white border-slate-900'
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  🏢 Hosteller
+                </button>
               </div>
-            </details>
+              {formData.hostelAssigned && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-gray-600 mb-1.5 block">Hostel Block / Name *</Label>
+                    <Input
+                      placeholder="e.g. C5, Block A"
+                      value={formData.hostelName}
+                      onChange={(e) => handleChange('hostelName', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-600 mb-1.5 block">Room Number *</Label>
+                    <Input
+                      placeholder="e.g. 101"
+                      value={formData.roomNumber}
+                      onChange={(e) => handleChange('roomNumber', e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
 
           </form>
         </div>

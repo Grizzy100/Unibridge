@@ -2,15 +2,15 @@
 //server/user-service/src/controllers/profile.controller.ts
 import { Request, Response } from "express";
 import * as profileService from "../services/profile.service.js";
-import { studentProfileSchema } from "../schemas/studentProfile.schema.js";
+import { studentProfileSchema, assignStudentHostelSchema } from "../schemas/studentProfile.schema.js";
 import { teacherProfileSchema } from "../schemas/teacherProfile.schema.js";
-import { wardenProfileSchema } from "../schemas/wardenProfile.schema.js";
+import { wardenProfileSchema, assignWardenHostelSchema } from "../schemas/wardenProfile.schema.js";
 import { parentProfileSchema, linkParentStudentSchema } from "../schemas/parentProfile.schema.js"
 // Create Student with Profile
 export async function createStudentProfile(req: Request, res: Response) {
   try {
     const result = studentProfileSchema.safeParse(req.body);
-    
+
     if (!result.success) {
       return res.status(400).json({
         success: false,
@@ -21,7 +21,7 @@ export async function createStudentProfile(req: Request, res: Response) {
       });
     }
     const student = await profileService.createStudentWithProfile(result.data);
-    
+
     return res.status(201).json({
       success: true,
       message: "Student created successfully",
@@ -38,7 +38,7 @@ export async function createStudentProfile(req: Request, res: Response) {
 export async function createTeacherProfile(req: Request, res: Response) {
   try {
     const result = teacherProfileSchema.safeParse(req.body);
-    
+
     if (!result.success) {
       return res.status(400).json({
         success: false,
@@ -49,7 +49,7 @@ export async function createTeacherProfile(req: Request, res: Response) {
       });
     }
     const teacher = await profileService.createTeacherWithProfile(result.data);
-    
+
     return res.status(201).json({
       success: true,
       message: "Teacher created successfully",
@@ -99,14 +99,14 @@ export async function getStudentById(req: Request, res: Response) {
   try {
     const { userId } = req.params;
     const student = await profileService.getStudentById(userId);
-    
+
     if (!student) {
       return res.status(404).json({
         success: false,
         message: "Student not found"
       });
     }
-    
+
     return res.json({
       success: true,
       data: student
@@ -123,14 +123,14 @@ export async function getTeacherById(req: Request, res: Response) {
   try {
     const { userId } = req.params;
     const teacher = await profileService.getTeacherById(userId);
-    
+
     if (!teacher) {
       return res.status(404).json({
         success: false,
         message: "Teacher not found"
       });
     }
-    
+
     return res.json({
       success: true,
       data: teacher
@@ -150,7 +150,7 @@ export async function deleteStudent(req: Request, res: Response) {
   try {
     const { userId } = req.params;
     await profileService.deleteStudent(userId);
-    
+
     return res.json({
       success: true,
       message: "Student deleted successfully"
@@ -170,7 +170,7 @@ export async function deleteTeacher(req: Request, res: Response) {
   try {
     const { userId } = req.params;
     await profileService.deleteTeacher(userId);
-    
+
     return res.json({
       success: true,
       message: "Teacher deleted successfully"
@@ -188,7 +188,7 @@ export async function deleteTeacher(req: Request, res: Response) {
 export async function createWardenProfile(req: Request, res: Response) {
   try {
     const result = wardenProfileSchema.safeParse(req.body);
-    
+
     if (!result.success) {
       return res.status(400).json({
         success: false,
@@ -199,7 +199,7 @@ export async function createWardenProfile(req: Request, res: Response) {
       });
     }
     const warden = await profileService.createWardenWithProfile(result.data);
-    
+
     return res.status(201).json({
       success: true,
       message: "Warden created successfully",
@@ -233,14 +233,14 @@ export async function getWardenById(req: Request, res: Response) {
   try {
     const { userId } = req.params;
     const warden = await profileService.getWardenById(userId);
-    
+
     if (!warden) {
       return res.status(404).json({
         success: false,
         message: "Warden not found"
       });
     }
-    
+
     return res.json({
       success: true,
       data: warden
@@ -257,7 +257,7 @@ export async function deleteWarden(req: Request, res: Response) {
   try {
     const { userId } = req.params;
     await profileService.deleteWarden(userId);
-    
+
     return res.json({
       success: true,
       message: "Warden deleted successfully"
@@ -275,7 +275,7 @@ export async function deleteWarden(req: Request, res: Response) {
 export async function createParentProfile(req: Request, res: Response) {
   try {
     const result = parentProfileSchema.safeParse(req.body);
-    
+
     if (!result.success) {
       return res.status(400).json({
         success: false,
@@ -286,7 +286,7 @@ export async function createParentProfile(req: Request, res: Response) {
       });
     }
     const parent = await profileService.createParentWithProfile(result.data);
-    
+
     return res.status(201).json({
       success: true,
       message: "Parent created successfully",
@@ -320,14 +320,14 @@ export async function getParentById(req: Request, res: Response) {
   try {
     const { userId } = req.params;
     const parent = await profileService.getParentById(userId);
-    
+
     if (!parent) {
       return res.status(404).json({
         success: false,
         message: "Parent not found"
       });
     }
-    
+
     return res.json({
       success: true,
       data: parent
@@ -344,7 +344,7 @@ export async function deleteParent(req: Request, res: Response) {
   try {
     const { userId } = req.params;
     await profileService.deleteParent(userId);
-    
+
     return res.json({
       success: true,
       message: "Parent deleted successfully"
@@ -360,7 +360,7 @@ export async function deleteParent(req: Request, res: Response) {
 export async function linkParentToStudent(req: Request, res: Response) {
   try {
     const result = linkParentStudentSchema.safeParse(req.body);
-    
+
     if (!result.success) {
       return res.status(400).json({
         success: false,
@@ -371,7 +371,7 @@ export async function linkParentToStudent(req: Request, res: Response) {
       });
     }
     const link = await profileService.linkParentToStudent(result.data);
-    
+
     return res.status(201).json({
       success: true,
       message: "Parent linked to student successfully",
@@ -389,7 +389,7 @@ export async function unlinkParentFromStudent(req: Request, res: Response) {
   try {
     const { parentId, studentId } = req.params;
     await profileService.unlinkParentFromStudent(parentId, studentId);
-    
+
     return res.json({
       success: true,
       message: "Parent unlinked successfully"
@@ -406,7 +406,7 @@ export async function getStudentParents(req: Request, res: Response) {
   try {
     const { studentId } = req.params;
     const parents = await profileService.getStudentParents(studentId);
-    
+
     return res.json({
       success: true,
       data: parents
@@ -424,14 +424,14 @@ export async function getStudentByProfileId(req: Request, res: Response) {
   try {
     const { studentId } = req.params;
     const student = await profileService.getStudentByProfileId(studentId);
-    
+
     if (!student) {
       return res.status(404).json({
         success: false,
         message: "Student not found"
       });
     }
-    
+
     return res.json({
       success: true,
       data: student
@@ -463,7 +463,7 @@ export async function getParentsByStudentProfileId(req: Request, res: Response) 
   try {
     const { studentId } = req.params;
     const parents = await profileService.getParentsByStudentProfileId(studentId);
-    
+
     return res.json({
       success: true,
       data: parents
@@ -472,6 +472,66 @@ export async function getParentsByStudentProfileId(req: Request, res: Response) 
     return res.status(500).json({
       success: false,
       message: error.message
+    });
+  }
+}
+
+// Assign Hostel to Student
+export async function assignStudentHostel(req: Request, res: Response) {
+  try {
+    const { userId } = req.params;
+    const result = assignStudentHostelSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        errors: result.error.issues.map((e: any) => ({
+          field: e.path.join('.'),
+          message: e.message
+        }))
+      });
+    }
+    const student = await profileService.assignStudentHostel(userId, result.data.hostelName, result.data.roomNumber || "");
+
+    return res.json({
+      success: true,
+      message: "Hostel assigned to student successfully",
+      data: student
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Failed to assign hostel"
+    });
+  }
+}
+
+// Assign Hostel to Warden
+export async function assignWardenHostel(req: Request, res: Response) {
+  try {
+    const { userId } = req.params;
+    const result = assignWardenHostelSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        errors: result.error.issues.map((e: any) => ({
+          field: e.path.join('.'),
+          message: e.message
+        }))
+      });
+    }
+    const warden = await profileService.assignWardenHostel(userId, result.data.hostelAssigned);
+
+    return res.json({
+      success: true,
+      message: "Hostel assigned to warden successfully",
+      data: warden
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Failed to assign hostel"
     });
   }
 }

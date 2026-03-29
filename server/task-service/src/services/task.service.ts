@@ -33,7 +33,7 @@ export async function createTask(
   try {
     const prisma = getPrisma();
 
-    console.log('Creating task for teacher:', teacherUserId);
+    // console.log('Creating task for teacher:', teacherUserId);
 
     const courses = await getTeacherCourses(teacherUserId, token);
 
@@ -73,7 +73,7 @@ export async function createTask(
       },
     });
 
-    console.log('Task created successfully:', task.id);
+    // console.log('Task created successfully:', task.id);
 
     try {
       await publishTaskCreated({
@@ -86,7 +86,7 @@ export async function createTask(
         maxMarks: task.maxMarks,
       });
 
-      console.log('Task creation event published');
+      // console.log('Task creation event published');
     } catch (eventError) {
       console.error('Failed to publish task.created event:', eventError);
     }
@@ -102,14 +102,14 @@ export async function getCourseTasks(courseId: string) {
   try {
     const prisma = getPrisma();
 
-    console.log('Fetching tasks for course:', courseId);
+    // console.log('Fetching tasks for course:', courseId);
 
     const tasks = await prisma.task.findMany({
       where: { courseId },
       orderBy: { dueDate: 'asc' },
     });
 
-    console.log(`Found ${tasks.length} tasks for course`);
+    // console.log(`Found ${tasks.length} tasks for course`);
 
     return tasks;
   } catch (error) {
@@ -122,7 +122,7 @@ export async function getStudentTasks(studentUserId: string, token?: string) {
   try {
     const prisma = getPrisma();
 
-    console.log('Fetching tasks for student user:', studentUserId);
+    // console.log('Fetching tasks for student user:', studentUserId);
 
     // ✅ Step 1: Get ProfileId from UserId (for database queries)
     const studentProfileId = await getStudentProfileIdFromUserId(
@@ -130,7 +130,7 @@ export async function getStudentTasks(studentUserId: string, token?: string) {
       token
     );
 
-    console.log('Student profile ID:', studentProfileId);
+    // console.log('Student profile ID:', studentProfileId);
 
     // ✅ Step 2: Pass User.id (NOT Profile.id) to get courses
     const courses = await getStudentCourses(studentUserId, token);
@@ -138,13 +138,13 @@ export async function getStudentTasks(studentUserId: string, token?: string) {
     //                                      CHANGED: Use userId, not profileId
 
     if (courses.length === 0) {
-      console.log('Student has no enrolled courses');
+      // console.log('Student has no enrolled courses');
       return [];
     }
 
     const courseIds = courses.map(course => course.id);
 
-    console.log('Fetching tasks for courses:', courseIds);
+    // console.log('Fetching tasks for courses:', courseIds);
 
     const tasks = await prisma.task.findMany({
       where: {
@@ -172,7 +172,7 @@ export async function getStudentTasks(studentUserId: string, token?: string) {
       },
     });
 
-    console.log(`Found ${tasks.length} tasks for student`);
+    // console.log(`Found ${tasks.length} tasks for student`);
 
     return tasks;
   } catch (error) {
@@ -191,7 +191,7 @@ export async function extendTaskForAll(
   try {
     const prisma = getPrisma();
 
-    console.log('Extending task deadline:', taskId);
+    // console.log('Extending task deadline:', taskId);
 
     const task = await prisma.task.findUnique({
       where: { id: taskId },
@@ -216,7 +216,7 @@ export async function extendTaskForAll(
       data: { dueDate: newDueDate },
     });
 
-    console.log('Task deadline extended successfully');
+    // console.log('Task deadline extended successfully');
 
     return updatedTask;
   } catch (error) {
@@ -229,18 +229,18 @@ export async function getTaskById(taskId: string) {
   try {
     const prisma = getPrisma();
 
-    console.log('Fetching task by ID:', taskId);
+    // console.log('Fetching task by ID:', taskId);
 
     const task = await prisma.task.findUnique({
       where: { id: taskId },
     });
 
     if (!task) {
-      console.log('Task not found:', taskId);
+      // console.log('Task not found:', taskId);
       return null;
     }
 
-    console.log('Task found:', task.title);
+    // console.log('Task found:', task.title);
 
     return task;
   } catch (error) {

@@ -17,6 +17,9 @@ interface MailQueueProps {
   setType: (t: MessageType) => void
   onToggleStar: (id: string) => void
   loading?: boolean
+  currentUserRole?: string
+  parentViewTab?: "MY_MAIL" | "WARD_MAIL"
+  setParentViewTab?: (tab: "MY_MAIL" | "WARD_MAIL") => void
 }
 
 export default function MailQueue({
@@ -30,6 +33,9 @@ export default function MailQueue({
   setType,
   onToggleStar,
   loading,
+  currentUserRole,
+  parentViewTab,
+  setParentViewTab,
 }: MailQueueProps) {
   return (
     <section className="bg-white border-r border-slate-200 min-w-0 flex flex-col">
@@ -48,7 +54,32 @@ export default function MailQueue({
           <TypeTabs type={type} setType={setType} />
         </div>
 
-        <div className="mt-3 relative">
+        {currentUserRole === "PARENT" && setParentViewTab && parentViewTab && (
+          <div className="mt-4 flex rounded-md bg-slate-100 p-1">
+            <button
+              onClick={() => setParentViewTab("MY_MAIL")}
+              className={`flex-1 flex items-center justify-center py-1.5 text-xs font-medium rounded-sm transition ${
+                parentViewTab === "MY_MAIL"
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              My Mails
+            </button>
+            <button
+              onClick={() => setParentViewTab("WARD_MAIL")}
+              className={`flex-1 flex items-center justify-center py-1.5 text-xs font-medium rounded-sm transition ${
+                parentViewTab === "WARD_MAIL"
+                  ? "bg-white text-cyan-800 shadow-sm border border-cyan-100/50"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Ward&apos;s Mails
+            </button>
+          </div>
+        )}
+
+        <div className="mt-4 relative">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             value={query}
@@ -140,9 +171,21 @@ export default function MailQueue({
                         </p>
                       </div>
 
-                      <p className="text-sm font-semibold text-slate-900 truncate mt-0.5">
-                        {secondaryText}
-                      </p>
+                      <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 truncate">
+                          {secondaryText}
+                        </p>
+                        {mail.isConfidential && (
+                          <span className="flex-shrink-0 text-[9px] uppercase font-bold text-red-700 bg-red-100 px-1 py-0.5 rounded-sm">
+                            Conf.
+                          </span>
+                        )}
+                        {mail.isMirrored && (
+                          <span className="flex-shrink-0 text-[9px] uppercase font-bold text-cyan-700 bg-cyan-100 px-1 py-0.5 rounded-sm">
+                            Mirror
+                          </span>
+                        )}
+                      </div>
 
                       <p className="text-xs text-slate-500 truncate mt-0.5">
                         {mail.preview}

@@ -77,6 +77,9 @@ export interface Mail {
   createdAt: string
   attachments?: Attachment[]
   messageId?: string
+  isMirrored?: boolean
+  isDirectRecipient?: boolean
+  isConfidential?: boolean
 }
 
 // API Response Types

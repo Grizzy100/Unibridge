@@ -17,6 +17,7 @@ import {
 } from "react-icons/pi";
 
 import { FaGraduationCap } from "react-icons/fa6";
+import { setAuth } from "../../lib/auth";
 
 type UserRole = "student" | "teacher" | "warden";
 
@@ -108,13 +109,16 @@ export default function RoleLoginForm({
         );
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
+      const token = data?.token ?? data?.data?.token;
+      const user = data?.user ?? data?.data?.user;
 
-      const userRole = data.user.role;
+      if (!token || !user) {
+        throw new Error("Invalid login response from server");
+      }
+
+      setAuth(token, user);
+
+      const userRole = user.role;
 
       switch (selectedRole) {
 

@@ -45,3 +45,11 @@ generated/
 # Docker
 # ===============================
 docker-data/
+
+knowledge/
+
+folder_codes.md
+
+*.tsbuildinfo
+
+chat-service

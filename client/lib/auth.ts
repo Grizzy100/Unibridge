@@ -51,6 +51,14 @@ export function setAuth(token: string, user: User, expiresIn: number = 86400) {
   localStorage.setItem(USER_KEY, JSON.stringify(user))
   localStorage.setItem(TOKEN_EXPIRY_KEY, expiryTime.toString())
 
+  // Backward compatibility for modules still reading legacy keys.
+  localStorage.setItem("token", token)
+  localStorage.setItem("user", JSON.stringify(user))
+
+  // Keep role-scoped legacy keys in sync as well.
+  localStorage.setItem(`token:${user.role}`, token)
+  localStorage.setItem(`user:${user.role}`, JSON.stringify(user))
+
   console.log(`[Auth] User ${user.role} logged in, token expires in ${expiresIn}s`)
 }
 
@@ -115,6 +123,16 @@ export function clearAuth() {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
   localStorage.removeItem(TOKEN_EXPIRY_KEY)
+
+  // Clear legacy keys to avoid stale state after logout.
+  localStorage.removeItem("token")
+  localStorage.removeItem("user")
+
+  const roles: Role[] = ["ADMIN", "STUDENT", "TEACHER", "PARENT", "WARDEN"]
+  for (const role of roles) {
+    localStorage.removeItem(`token:${role}`)
+    localStorage.removeItem(`user:${role}`)
+  }
 
   console.log("[Auth] Session cleared")
 }

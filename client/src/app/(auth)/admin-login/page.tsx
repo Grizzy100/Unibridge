@@ -7,7 +7,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Input } from "../../../../components/ui/input";
 import { Button } from "../../../../components/ui/button";
-import { login, setToken, setUser } from "../../../../lib/auth";
+import { login } from "../../../../lib/auth";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -24,18 +24,14 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const data = await login(email, password);
+      const response = await login(email, password);
       
       // Check if user is admin
-      if (data.user.role !== "ADMIN") {
+      if (response.data.user.role !== "ADMIN") {
         setError("Access denied. Admin credentials required.");
         setLoading(false);
         return;
       }
-      
-      // Save token and user data
-      setToken(data.token);
-      setUser(data.user);
       
       // ✅ Redirect to /admin (not /admin/dashboard)
       router.push("/admin");

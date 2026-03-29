@@ -44,7 +44,6 @@ export const validateConfig = () => {
   if (missing.length > 0) {
     throw new Error(`Missing env variables: ${missing.join(", ")}`)
   }
-  console.log("✅ Configuration validated")
 }
 
 

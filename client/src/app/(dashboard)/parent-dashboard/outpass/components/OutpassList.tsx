@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import OutpassCard, { Outpass } from './OutpassCard';
+import { parentOutpassAPI } from '../../../../../../lib/outpass';
 
 type StatusType = 'approved' | 'cancelled' | 'all';
 
@@ -12,23 +13,25 @@ export default function OutpassList({ filter }: { filter: StatusType }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let url = 'http://localhost:3003/api/outpass/parent-history';
-    if (filter !== 'all') url += `?filter=${filter}`;
-    fetch(url, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Unable to fetch history');
-        return res.json();
-      })
-      .then(data => {
-        setOutpasses(data.data || []);
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response =
+          filter === 'all'
+            ? await parentOutpassAPI.getHistory()
+            : await parentOutpassAPI.getHistory(filter);
+
+        setOutpasses(response.data || []);
+      } catch {
+        setError('Failed to load requests.');
+      } finally {
         setLoading(false);
-      })
-      .catch(err => {
-        setError("Failed to load requests.");
-        setLoading(false);
-      });
+      }
+    };
+
+    load();
   }, [filter]);
 
   if (loading) return <div className="mt-4 text-gray-600">Loading...</div>;

@@ -45,6 +45,7 @@ export interface SendMailRequest {
   subject: string
   body: string
   type: string
+  isConfidential?: boolean
   attachments?: File[]
 }
 
@@ -377,6 +378,9 @@ export async function sendMail(
   form.append("subject", data.subject)
   form.append("body", data.body)
   form.append("type", data.type)
+  if (data.isConfidential !== undefined) {
+    form.append("isConfidential", data.isConfidential.toString())
+  }
   if (data.attachments?.length) {
     data.attachments.forEach((f) => form.append("attachments", f))
   }
@@ -431,7 +435,74 @@ export async function sendMail(
 }
 
 // ============================================================================
-// ROLE UTILS FOR UI
+// NEW FEATURES: Drafts & Read Receipts
+// ============================================================================ 
+
+export async function saveDraft(data: Partial<SendMailRequest>): Promise<ApiSuccess<{ messageId: string }>> {
+  const token = getToken()
+  if (!token) throw new MailAPIError("Authentication required", 401, "NO_TOKEN")
+
+  try {
+    const res = await fetch(`${API_BASE}/drafts`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    const json = await res.json()
+    if (!res.ok) throw new MailAPIError(json.error || `Save draft failed (${res.status})`, res.status)
+    return json as ApiSuccess<{ messageId: string }>
+  } catch (e) {
+    if (e instanceof MailAPIError) throw e
+    throw new MailAPIError("Network error while saving draft", 0, "NETWORK_ERROR")
+  }
+}
+
+export async function updateDraft(messageId: string, data: Partial<SendMailRequest>): Promise<ApiSuccess<{ messageId: string }>> {
+  const token = getToken()
+  if (!token) throw new MailAPIError("Authentication required", 401, "NO_TOKEN")
+
+  try {
+    const res = await fetch(`${API_BASE}/drafts/${messageId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    const json = await res.json()
+    if (!res.ok) throw new MailAPIError(json.error || `Update draft failed (${res.status})`, res.status)
+    return json as ApiSuccess<{ messageId: string }>
+  } catch (e) {
+    if (e instanceof MailAPIError) throw e
+    throw new MailAPIError("Network error while updating draft", 0, "NETWORK_ERROR")
+  }
+}
+
+export async function getReadReceipts(messageId: string): Promise<ApiSuccess<{ messageId: string; totalRecipients: number; readCount: number; receipts: any[] }>> {
+  const token = getToken()
+  if (!token) throw new MailAPIError("Authentication required", 401, "NO_TOKEN")
+
+  try {
+    const res = await fetch(`${API_BASE}/messages/${messageId}/read-receipts`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+
+    const json = await res.json()
+    if (!res.ok) throw new MailAPIError(json.error || `Failed to fetch receipts (${res.status})`, res.status)
+    return json as ApiSuccess<{ messageId: string; totalRecipients: number; readCount: number; receipts: any[] }>
+  } catch (e) {
+    if (e instanceof MailAPIError) throw e
+    throw new MailAPIError("Network error fetching receipts", 0, "NETWORK_ERROR")
+  }
+}
+
+// ============================================================================ 
 // ============================================================================
 
 export function getCurrentUserRole() {

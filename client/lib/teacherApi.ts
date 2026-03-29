@@ -124,9 +124,10 @@ export const teacherApi = {
       })
     },
 
-    refreshQr: async (sessionId: string): Promise<AttendanceSession> => {
+    refreshQr: async (sessionId: string, qrValiditySeconds: number = 30): Promise<AttendanceSession> => {
       return request<AttendanceSession>(`${ATT_SERVICE}/api/sessions/${sessionId}/qr/refresh`, {
         method: "PATCH",
+        body: { qrValiditySeconds },
       })
     },
 

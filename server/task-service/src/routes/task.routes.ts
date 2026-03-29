@@ -24,6 +24,9 @@ router.patch('/:id/extend', authenticate, authorize('TEACHER'), taskCtrl.extendT
 
 router.get('/my', authenticate, authorize('STUDENT'), taskCtrl.getMyTasks);
 
+// Get tasks for a specific student (used by Parents)
+router.get('/student/:studentUserId', authenticate, taskCtrl.getTasksForStudent);
+
 // COURSE + MY TASKS
 router.get('/course/:courseId', authenticate, taskCtrl.getCourseTasks);
 

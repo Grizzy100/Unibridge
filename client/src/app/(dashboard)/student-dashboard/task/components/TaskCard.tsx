@@ -200,9 +200,10 @@ interface TaskCardProps {
   task: Task;
   courseCode: string;
   onSubmitClick: () => void;
+  readOnly?: boolean;
 }
 
-export default function TaskCard({ task, courseCode, onSubmitClick }: TaskCardProps) {
+export default function TaskCard({ task, courseCode, onSubmitClick, readOnly = false }: TaskCardProps) {
   const submission = task.submissions?.[0];
   const status = submission?.status || 'PENDING';
   const [timeRemaining, setTimeRemaining] = useState('');
@@ -385,7 +386,7 @@ export default function TaskCard({ task, courseCode, onSubmitClick }: TaskCardPr
           )}
 
           {/* Submit Button */}
-          {canSubmit && (
+          {canSubmit && !readOnly && (
             <button
               onClick={onSubmitClick}
               className="px-5 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors duration-200"

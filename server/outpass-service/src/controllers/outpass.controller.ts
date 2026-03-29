@@ -30,13 +30,24 @@ export async function createOutpass(req: Request, res: Response) {
     const proofFile = req.file;
 
     const userId = req.user.userId;
-    const studentProfile = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id FROM public."StudentProfile" WHERE "userId" = ${userId}
+    const studentProfile = await prisma.$queryRaw<Array<{ id: string; hostelAssigned: boolean }>>`
+      SELECT id, "hostelAssigned" FROM public."StudentProfile" WHERE "userId" = ${userId}
     `;
     
     if (!studentProfile || studentProfile.length === 0) {
       return res.status(404).json({ success: false, message: 'Student profile not found' });
     }
+
+    // ── Day Scholar Guard ──────────────────────────────────────────────────
+    // Students without a hostel assignment are day scholars and cannot
+    // create outpass requests. Admin must assign hostel first.
+    if (!studentProfile[0].hostelAssigned) {
+      return res.status(403).json({
+        success: false,
+        message: 'Day scholars are not eligible for outpass. Please contact the admin if this is incorrect.',
+      });
+    }
+    // ──────────────────────────────────────────────────────────────────────
 
     const studentId = studentProfile[0].id;
     const outpassData = { ...result.data, studentId };
@@ -45,12 +56,11 @@ export async function createOutpass(req: Request, res: Response) {
     
     res.status(201).json({ success: true, data: outpass });
   } catch (error: any) {
-    // ✅ Handle 409 Conflict from service layer
+    // Handle 409 Conflict from service layer
     const status = error.statusCode || 500;
     res.status(status).json({ success: false, message: error.message });
   }
 }
-
 
 
 
@@ -101,23 +111,20 @@ export async function getPendingForParent(req: Request, res: Response) {
     if (!req.user || !req.user.userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
-    const userId = req.user.userId;
-    const parentProfile = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id FROM public."ParentProfile" WHERE "userId" = ${userId}
-    `;
-    
-    if (!parentProfile || parentProfile.length === 0) {
-      return res.status(404).json({ success: false, message: 'Parent profile not found' });
-    }
-    const parentId = parentProfile[0].id;
+
     const studentLinks = await prisma.$queryRaw<Array<{ studentId: string }>>`
-      SELECT "studentId" FROM public."ParentStudentLink" WHERE "parentId" = ${parentId}
+      SELECT psl."studentId" 
+      FROM public."ParentStudentLink" psl
+      JOIN public."ParentProfile" pp ON psl."parentId" = pp.id
+      WHERE pp."userId" = ${req.user.userId}
     `;
     
     const studentIds = studentLinks.map(link => link.studentId);
+    
     if (studentIds.length === 0) {
       return res.json({ success: true, data: [] });
     }
+    
     const outpasses = await outpassService.getPendingForParent(studentIds);
     res.json({ success: true, data: outpasses });
   } catch (error: any) {
@@ -129,30 +136,29 @@ export async function getParentOutpassHistory(req: Request, res: Response) {
     if (!req.user || !req.user.userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
-    const userId = req.user.userId;
-    const parentProfile = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id FROM public."ParentProfile" WHERE "userId" = ${userId}
-    `;
-    
-    if (!parentProfile || parentProfile.length === 0) {
-      return res.status(404).json({ success: false, message: 'Parent profile not found' });
-    }
-    const parentId = parentProfile[0].id;
+
     const studentLinks = await prisma.$queryRaw<Array<{ studentId: string }>>`
-      SELECT "studentId" FROM public."ParentStudentLink" WHERE "parentId" = ${parentId}
+      SELECT psl."studentId" 
+      FROM public."ParentStudentLink" psl
+      JOIN public."ParentProfile" pp ON psl."parentId" = pp.id
+      WHERE pp."userId" = ${req.user.userId}
     `;
     
     const studentIds = studentLinks.map(link => link.studentId);
+    
     if (studentIds.length === 0) {
       return res.json({ success: true, data: [] });
     }
+    
     const filter = req.query.filter as string | undefined;
     let whereClause: any = { studentId: { in: studentIds } };
+    
     if (filter === 'approved') {
       whereClause.parentApproval = 'APPROVED';
     } else if (filter === 'cancelled') {
       whereClause.status = 'CANCELLED';
     }
+    
     const outpasses = await prisma.outpassRequest.findMany({
       where: whereClause,
       orderBy: { createdAt: 'desc' }
@@ -164,12 +170,29 @@ export async function getParentOutpassHistory(req: Request, res: Response) {
 }
 export async function handleParentApproval(req: Request, res: Response) {
   try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
     const { id } = req.params;
     const result = parentApprovalSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ success: false, errors: result.error.issues });
     }
-    const outpass = await outpassService.parentApproval(id, result.data.action);
+
+    const studentLinks = await prisma.$queryRaw<Array<{ studentId: string }>>`
+      SELECT psl."studentId" 
+      FROM public."ParentStudentLink" psl
+      JOIN public."ParentProfile" pp ON psl."parentId" = pp.id
+      WHERE pp."userId" = ${req.user.userId}
+    `;
+    const authorizedWardIds = studentLinks.map(link => link.studentId);
+
+    if (authorizedWardIds.length === 0) {
+      return res.status(403).json({ success: false, message: 'No linked wards found for this parent' });
+    }
+
+    const outpass = await outpassService.parentApproval(id, result.data.action, authorizedWardIds);
     res.json({ success: true, data: outpass });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });

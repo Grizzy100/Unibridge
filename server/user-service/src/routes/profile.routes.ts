@@ -33,4 +33,9 @@ router.delete("/parents/:userId", authenticate, authorize("ADMIN"), profileCtrl.
 router.post("/parent-student-link", authenticate, authorize("ADMIN"), profileCtrl.linkParentToStudent);
 router.delete("/parent-student-link/:parentId/:studentId", authenticate, authorize("ADMIN"), profileCtrl.unlinkParentFromStudent);
 router.get("/students/:studentId/parents", authenticate, profileCtrl.getStudentParents);
+
+// Hostel assignment routes (ADMIN only)
+router.patch("/students/:userId/hostel", authenticate, authorize("ADMIN"), profileCtrl.assignStudentHostel);
+router.patch("/wardens/:userId/hostel", authenticate, authorize("ADMIN"), profileCtrl.assignWardenHostel);
+
 export default router;

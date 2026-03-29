@@ -24,7 +24,7 @@ export async function startAttendanceEventsConsumer() {
 }
 
 async function handleLowAttendanceAlert(data: any) {
-  console.log('📉 Processing low attendance alert:', data);
+  // console.log('📉 Processing low attendance alert:', data);
   const {
     studentId,
     courseId,
@@ -74,11 +74,11 @@ async function handleLowAttendanceAlert(data: any) {
       )
     );
   }
-  console.log('✅ Low attendance alert processed');
+  // console.log('✅ Low attendance alert processed');
 }
 
 async function handleWeeklySummary(data: any) {
-  console.log('📊 Processing weekly summary:', data);
+  // console.log('📊 Processing weekly summary:', data);
   const {
     studentId,
     overallPercentage,
@@ -123,5 +123,5 @@ async function handleWeeklySummary(data: any) {
       )
     );
   }
-  console.log('✅ Weekly summary processed');
+  // console.log('✅ Weekly summary processed');
 }

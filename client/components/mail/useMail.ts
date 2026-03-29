@@ -84,6 +84,8 @@ export function useMail() {
         setMails((prev) =>
           prev.map((m) => (m.id === id ? { ...m, unread: false } : m))
         )
+        // Fire custom event to immediately drop Sidebar unread badge counts globally
+        window.dispatchEvent(new Event('mail:read'))
       } catch (err) {
         console.error("[useMail] Failed to mark as read:", err)
       }

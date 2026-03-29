@@ -53,7 +53,7 @@ export default function UniversityPage() {
 
   const handleNext = () => {
     // You can store the selected university in localStorage or context if needed
-    router.push("/student-login");
+    router.push("/login/student");
   };
 
   return (

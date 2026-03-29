@@ -7,8 +7,8 @@ import prisma from '../utils/prisma.js';
 // Create Student with Profile
 export async function createStudentWithProfile(data: any) {
   try {
-    const existingUser = await prisma.user.findUnique({ 
-      where: { email: data.email } 
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email }
     });
     if (existingUser) throw new Error("Email already exists");
     const existingEnrollment = await prisma.studentProfile.findUnique({
@@ -72,8 +72,8 @@ export async function createStudentWithProfile(data: any) {
 // Create Teacher with Profile
 export async function createTeacherWithProfile(data: any) {
   try {
-    const existingUser = await prisma.user.findUnique({ 
-      where: { email: data.email } 
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email }
     });
     if (existingUser) throw new Error("Email already exists");
     const existingEmployee = await prisma.teacherProfile.findUnique({
@@ -168,7 +168,7 @@ export async function getStudentById(userId: string) {
   try {
     return await prisma.studentProfile.findUnique({
       where: { userId },
-      include: { 
+      include: {
         user: { select: { email: true, role: true } },
         courseEnrollments: {
           include: {
@@ -188,7 +188,7 @@ export async function getTeacherById(userId: string) {
   try {
     return await prisma.teacherProfile.findUnique({
       where: { userId },
-      include: { 
+      include: {
         user: { select: { email: true, role: true } },
         coursesTaught: true
       }
@@ -230,8 +230,8 @@ export async function deleteTeacher(userId: string) {
 // ─────────────────────────────────────────
 export async function createWardenWithProfile(data: any) {
   try {
-    const existingUser = await prisma.user.findUnique({ 
-      where: { email: data.email } 
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email }
     });
     if (existingUser) throw new Error("Email already exists");
     const existingEmployee = await prisma.wardenProfile.findUnique({
@@ -301,7 +301,7 @@ export async function getWardenById(userId: string) {
   try {
     return await prisma.wardenProfile.findUnique({
       where: { userId },
-      include: { 
+      include: {
         user: { select: { email: true, role: true } }
       }
     });
@@ -330,8 +330,8 @@ export async function deleteWarden(userId: string) {
 // ─────────────────────────────────────────
 export async function createParentWithProfile(data: any) {
   try {
-    const existingUser = await prisma.user.findUnique({ 
-      where: { email: data.email } 
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email }
     });
     if (existingUser) throw new Error("Email already exists");
     const hashedPassword = await bcrypt.hash(data.password, 12);
@@ -375,7 +375,7 @@ export async function createParentWithProfile(data: any) {
 export async function getAllParents() {
   try {
     return await prisma.parentProfile.findMany({
-      include: { 
+      include: {
         user: { select: { email: true, createdAt: true } },
         studentLinks: {
           include: {
@@ -403,7 +403,7 @@ export async function getParentById(userId: string) {
   try {
     return await prisma.parentProfile.findUnique({
       where: { userId },
-      include: { 
+      include: {
         user: { select: { email: true, role: true } },
         studentLinks: {
           include: {
@@ -523,7 +523,7 @@ export async function getStudentByProfileId(studentProfileId: string) {
   try {
     return await prisma.studentProfile.findUnique({
       where: { id: studentProfileId },
-      include: { 
+      include: {
         user: { select: { id: true, email: true, role: true } }
       }
     });
@@ -574,5 +574,41 @@ export async function getParentsByStudentProfileId(studentProfileId: string) {
   } catch (error: any) {
     console.error("Error fetching parents by student profile ID:", error.message);
     throw error;
+  }
+}
+
+// ─────────────────────────────────────────
+// Assign Hostel to Student
+// ─────────────────────────────────────────
+export async function assignStudentHostel(studentId: string, hostelName: string, roomNumber: string) {
+  try {
+    return await prisma.studentProfile.update({
+      where: { userId: studentId },
+      data: {
+        hostelName,
+        roomNumber,
+        hostelAssigned: true
+      }
+    });
+  } catch (error: any) {
+    console.error("Error assigning hostel to student:", error.message);
+    throw new Error("Failed to assign hostel to student");
+  }
+}
+
+// ─────────────────────────────────────────
+// Assign Hostel to Warden
+// ─────────────────────────────────────────
+export async function assignWardenHostel(wardenId: string, hostelAssigned: string) {
+  try {
+    return await prisma.wardenProfile.update({
+      where: { userId: wardenId },
+      data: {
+        hostelAssigned
+      }
+    });
+  } catch (error: any) {
+    console.error("Error assigning hostel to warden:", error.message);
+    throw new Error("Failed to assign hostel to warden");
   }
 }

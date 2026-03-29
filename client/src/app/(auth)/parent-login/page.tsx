@@ -1,0 +1,1 @@
+export default function ParentLoginPage() { return <div>Parent Login</div>; }

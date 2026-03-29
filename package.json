@@ -1,0 +1,22 @@
+{
+  "name": "unibridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root workspace runner for Unibridge Microservices",
+  "scripts": {
+    "dev:client": "npm run dev --prefix client",
+    "dev:attendance": "npm run dev --prefix server/attendance-service",
+    "dev:chat": "npm run dev --prefix server/chat-service",
+    "dev:mail": "npm run dev --prefix server/mail-service",
+    "dev:notification": "npm run dev --prefix server/notification-service",
+    "dev:outpass": "npm run dev --prefix server/outpass-service",
+    "dev:task": "npm run dev --prefix server/task-service",
+    "dev:user": "npm run dev --prefix server/user-service",
+    "dev:server": "concurrently -c \"cyan,magenta,yellow,blue,green,gray,red\" \"npm run dev:attendance\" \"npm run dev:chat\" \"npm run dev:mail\" \"npm run dev:notification\" \"npm run dev:outpass\" \"npm run dev:task\" \"npm run dev:user\"",
+    "dev": "concurrently -c \"white,cyan,magenta,yellow,blue,green,gray,red\" \"npm run dev:client\" \"npm run dev:attendance\" \"npm run dev:chat\" \"npm run dev:mail\" \"npm run dev:notification\" \"npm run dev:outpass\" \"npm run dev:task\" \"npm run dev:user\"",
+    "install:all": "npm install --prefix client && npm install --prefix server/attendance-service && npm install --prefix server/chat-service && npm install --prefix server/mail-service && npm install --prefix server/notification-service && npm install --prefix server/outpass-service && npm install --prefix server/task-service && npm install --prefix server/user-service"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

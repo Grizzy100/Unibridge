@@ -66,17 +66,26 @@ export default function TaskPage() {
 
   const courseMap = new Map(courses.map(c => [c.id, c.courseCode]));
 
+  const now = Date.now();
+
   const filteredTasks = tasks.filter((task) => {
     const submission = task.submissions?.[0];
+    const status = submission?.status ?? null;
+    const isPastDue = now > new Date(submission?.customDueDate || task.dueDate).getTime();
 
     if (activeFilter === 'Completed') {
-      if (!submission || (submission.status !== 'SUBMITTED' && submission.status !== 'GRADED')) {
-        return false;
-      }
-    } else if (activeFilter === 'Pending') {
-      if (submission?.status !== 'PENDING') return false;
-    } else if (activeFilter === 'Overdue') {
-      if (submission?.status !== 'LATE') return false;
+      // SUBMITTED or GRADED — task is done (even if late)
+      return status === 'SUBMITTED' || status === 'GRADED' || status === 'LATE';
+    }
+
+    if (activeFilter === 'Pending') {
+      // No submission yet (null) OR explicitly PENDING — and NOT past due
+      return (status === null || status === 'PENDING') && !isPastDue;
+    }
+
+    if (activeFilter === 'Overdue') {
+      // LATE submission OR no submission at all but past the due date
+      return status === 'LATE' || ((status === null || status === 'PENDING') && isPastDue);
     }
 
     if (selectedCourseId !== 'All' && task.courseId !== selectedCourseId) {

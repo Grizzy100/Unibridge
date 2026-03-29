@@ -148,9 +148,16 @@ interface CourseAttendanceCardProps {
     activeSession?: AttendanceSession
   }
   onRefresh: () => void
+  readOnly?: boolean
+  subjectUserId?: string
 }
 
-export default function CourseAttendanceCard({ course, onRefresh }: CourseAttendanceCardProps) {
+export default function CourseAttendanceCard({
+  course,
+  onRefresh,
+  readOnly = false,
+  subjectUserId,
+}: CourseAttendanceCardProps) {
   const [showScanner, setShowScanner] = useState(false)
   const [checkingOutpass, setCheckingOutpass] = useState(false)
   const [hasActiveOutpass, setHasActiveOutpass] = useState(false)
@@ -174,7 +181,9 @@ export default function CourseAttendanceCard({ course, onRefresh }: CourseAttend
       const user = getUser()
       const token = getToken()
 
-      if (!user?.id || !token) {
+      const effectiveUserId = subjectUserId || user?.id;
+
+      if (!effectiveUserId || !token) {
         setHasActiveOutpass(false)
         setCheckingOutpass(false)
         return
@@ -183,7 +192,7 @@ export default function CourseAttendanceCard({ course, onRefresh }: CourseAttend
       try {
         setCheckingOutpass(true)
 
-        const url = new URL(`${OUTPASS_URL}/api/outpass/check-active/${user.id}`)
+        const url = new URL(`${OUTPASS_URL}/api/outpass/check-active/${effectiveUserId}`)
         url.searchParams.set('date', activeSession.sessionStartTime)
 
         const res = await fetch(url.toString(), {
@@ -208,14 +217,15 @@ export default function CourseAttendanceCard({ course, onRefresh }: CourseAttend
     run()
   }, [hasActiveSession, activeSession?.sessionStartTime])
 
-  const canShowMarkButton = hasActiveSession && !checkingOutpass && !hasActiveOutpass
+  const canShowMarkButton =
+    !readOnly && hasActiveSession && !checkingOutpass && !hasActiveOutpass
 
   return (
     <>
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
         <div className="p-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shrink-0">
               <FiBook className="text-white text-xl" />
             </div>
 
@@ -259,7 +269,7 @@ export default function CourseAttendanceCard({ course, onRefresh }: CourseAttend
             </div>
           </div>
 
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {hasActiveOutpass ? null : canShowMarkButton ? (
               <button
                 onClick={() => setShowScanner(true)}
@@ -268,6 +278,10 @@ export default function CourseAttendanceCard({ course, onRefresh }: CourseAttend
                 <IoQrCodeOutline className="text-lg" />
                 Mark attendance
               </button>
+            ) : readOnly ? (
+              <div className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-sm font-semibold">
+                View only
+              </div>
             ) : (
               <div className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-500 text-sm font-semibold">
                 {hasActiveSession ? (checkingOutpass ? 'Checking' : 'Not available') : 'Not available'}

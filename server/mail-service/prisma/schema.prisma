@@ -73,6 +73,7 @@ model Message {
   body        String      @db.Text
   type        MessageType @default(GENERAL)
   threadId    String?
+  isConfidential Boolean  @default(false)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -97,11 +98,15 @@ model MessageParticipant {
   folder        FolderType     @default(INBOX)
   readAt        DateTime?
   flagged       Boolean        @default(false)
+  isMirrored    Boolean        @default(false)
+  mirroredFromUserId String?
+  isDirectRecipient  Boolean   @default(true)
   deletedAt     DateTime?
   archivedAt    DateTime?
   createdAt     DateTime       @default(now())
 
   @@unique([messageId, userId])
+  @@index([userId, isMirrored])
   @@index([userId, folder])
   @@index([userId, flagged])
   @@index([readAt])

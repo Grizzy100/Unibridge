@@ -25,6 +25,7 @@ export interface SendMessageDTO {
   body: string
   type: MessageType
   attachments?: Express.Multer.File[]
+  isConfidential?: boolean
 }
 
 
@@ -66,10 +67,10 @@ class MessageService {
     })
 
     // Step 2: Batch fetch all users in ONE API call
-    console.log(`[MessageService] Batch fetching ${allUserIds.size} unique users...`)
+    // console.log(`[MessageService] Batch fetching ${allUserIds.size} unique users...`)
     const userIds = Array.from(allUserIds)
     const users = await userServiceClient.getUsersByIds(userIds)
-    
+
     // Step 3: Create user lookup map for O(1) access
     const userMap = new Map()
     users.forEach(user => {
@@ -105,26 +106,26 @@ class MessageService {
       // ✅ FIXED: Explicit type for destructured parameters
       const toRecipients: RecipientData[] = allRecipients
         .filter((r: RecipientWithType) => r.recipientType === RecipientType.TO)
-        .map((r: RecipientWithType): RecipientData => ({ 
-          id: r.id, 
-          name: r.name, 
-          email: r.email 
+        .map((r: RecipientWithType): RecipientData => ({
+          id: r.id,
+          name: r.name,
+          email: r.email
         }))
-      
+
       const ccRecipients: RecipientData[] = allRecipients
         .filter((r: RecipientWithType) => r.recipientType === RecipientType.CC)
-        .map((r: RecipientWithType): RecipientData => ({ 
-          id: r.id, 
-          name: r.name, 
-          email: r.email 
+        .map((r: RecipientWithType): RecipientData => ({
+          id: r.id,
+          name: r.name,
+          email: r.email
         }))
-      
+
       const bccRecipients: RecipientData[] = allRecipients
         .filter((r: RecipientWithType) => r.recipientType === RecipientType.BCC)
-        .map((r: RecipientWithType): RecipientData => ({ 
-          id: r.id, 
-          name: r.name, 
-          email: r.email 
+        .map((r: RecipientWithType): RecipientData => ({
+          id: r.id,
+          name: r.name,
+          email: r.email
         }))
 
       return {
@@ -141,6 +142,9 @@ class MessageService {
         flagged: participant.flagged,
         folder: participant.folder,
         recipientType: participant.recipientType,
+        isMirrored: participant.isMirrored || false,
+        isDirectRecipient: participant.isDirectRecipient ?? true,
+        isConfidential: msg.isConfidential || false,
 
         recipients: toRecipients,
         to: toRecipients,
@@ -188,23 +192,35 @@ class MessageService {
       uploadedAttachments = await cloudinaryService.uploadMultiple(dto.attachments)
     }
 
-    const studentIds = new Set([...toUserIds, ...ccUserIds])
-    const parentIds = new Set<string>()
-    const parentPromises = Array.from(studentIds).map(id => userServiceClient.getParentsByStudentId(id).catch(() => []))
-    const parentResults = await Promise.all(parentPromises)
-    parentResults.flat().forEach(pid => parentIds.add(pid))
+      const parentMapping = new Map<string, string>() // parentId -> studentId
+      if (!dto.isConfidential) {
+        const studentIds = new Set([...toUserIds, ...ccUserIds, ...bccUserIds])
+        const parentPromises = Array.from(studentIds).map(async id => {
+          try {
+            const pIds = await userServiceClient.getParentsByStudentId(id)
+            return { studentId: id, pIds: pIds || [] }
+          } catch {
+            return { studentId: id, pIds: [] }
+          }
+        })
+        const parentResults = await Promise.all(parentPromises)
+        parentResults.forEach(({ studentId, pIds }) => {
+          pIds.forEach(pid => parentMapping.set(pid, studentId))
+        })
+      }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const message = await tx.message.create({
-        data: {
-          senderId: dto.senderId,
-          senderName: `${senderInfo.profile.firstName} ${senderInfo.profile.lastName}`,
-          senderEmail: senderInfo.email,
-          subject: dto.subject,
-          body: dto.body,
-          type: dto.type,
-        }
-      })
+      const result = await prisma.$transaction(async (tx) => {
+        const message = await tx.message.create({
+          data: {
+            senderId: dto.senderId,
+            senderName: `${senderInfo.profile.firstName} ${senderInfo.profile.lastName}`,
+            senderEmail: senderInfo.email,
+            subject: dto.subject,
+            body: dto.body,
+            type: dto.type,
+            isConfidential: dto.isConfidential || false,
+          }
+        })
 
       const allTargets = [
         ...dto.targets.map(t => ({ messageId: message.id, ...t })),
@@ -218,13 +234,16 @@ class MessageService {
       const participants: any[] = []
       const processedIds = new Set<string>()
 
-      const addParticipant = (uid: string, type: RecipientType, folder: FolderType) => {
+      const addParticipant = (uid: string, type: RecipientType, folder: FolderType, isMirrored = false, mirroredFromUserId: string | null = null, isDirectRecipient = true) => {
         if (!processedIds.has(uid) && uid !== dto.senderId) {
           participants.push({
             messageId: message.id,
             userId: uid,
             recipientType: type,
-            folder: folder
+            folder: folder,
+            isMirrored,
+            mirroredFromUserId,
+            isDirectRecipient
           })
           processedIds.add(uid)
         }
@@ -235,13 +254,20 @@ class MessageService {
         userId: dto.senderId,
         recipientType: RecipientType.SENDER,
         folder: FolderType.SENT,
-        readAt: new Date()
+        readAt: new Date(),
+        isMirrored: false,
+        mirroredFromUserId: null,
+        isDirectRecipient: true
       })
 
-      toUserIds.forEach(id => addParticipant(id, RecipientType.TO, FolderType.INBOX))
-      ccUserIds.forEach(id => addParticipant(id, RecipientType.CC, FolderType.INBOX))
-      bccUserIds.forEach(id => addParticipant(id, RecipientType.BCC, FolderType.INBOX))
-      parentIds.forEach(id => addParticipant(id, RecipientType.BCC, FolderType.INBOX))
+      toUserIds.forEach(id => addParticipant(id, RecipientType.TO, FolderType.INBOX, false, null, true))
+      ccUserIds.forEach(id => addParticipant(id, RecipientType.CC, FolderType.INBOX, false, null, true))
+      bccUserIds.forEach(id => addParticipant(id, RecipientType.BCC, FolderType.INBOX, false, null, true))
+      
+      // Add mirrored parents
+      parentMapping.forEach((studentId, parentId) => {
+        addParticipant(parentId, RecipientType.BCC, FolderType.INBOX, true, studentId, false)
+      })
 
       if (participants.length > 0) {
         await tx.messageParticipant.createMany({ data: participants })
@@ -363,20 +389,20 @@ class MessageService {
 
 
   async getArchive(userId: string, page = 1, limit = 20) {
-    console.log(`[Service] getArchive:`, { userId, page, limit })
-    
+    // console.log(`[Service] getArchive:`, { userId, page, limit })
+
     const result = await messageRepository.getMessagesByFolder(userId, FolderType.ARCHIVE, page, limit)
-    
-    console.log(`[Service] Raw query returned:`, {
-      messagesCount: result.messages.length,
-      total: result.total
-    })
-    
+
+    // console.log(`[Service] Raw query returned:`, {
+    //   messagesCount: result.messages.length,
+    //   total: result.total
+    // })
+
     const messages = await this.transformMessages(result.messages)
 
-    console.log(`[Service] After transform:`, {
-      messagesCount: messages.length
-    })
+    // console.log(`[Service] After transform:`, {
+    //   messagesCount: messages.length
+    // })
 
     return {
       messages,
@@ -392,14 +418,14 @@ class MessageService {
     if (!message) throw new NotFoundError('Message')
     const hasAccess = message.participants.some((p) => p.userId === userId)
     if (!hasAccess) throw new ForbiddenError('Access denied')
-    
+
     const userParticipant = message.participants.find((p) => p.userId === userId)
     if (userParticipant?.recipientType === RecipientType.BCC) {
       message.participants = message.participants.filter((p) => p.recipientType === RecipientType.TO || p.userId === userId)
     } else if (userParticipant?.recipientType !== RecipientType.SENDER) {
       message.participants = message.participants.filter((p) => p.recipientType !== RecipientType.BCC || p.userId === userId)
     }
-    
+
     return this.transformSingleMessage({
       ...userParticipant,
       message
@@ -430,17 +456,17 @@ class MessageService {
 
 
   async moveToArchive(messageId: string, userId: string) {
-    console.log(`[Service] Moving to archive:`, { messageId, userId })
-  
+    // console.log(`[Service] Moving to archive:`, { messageId, userId })
+
     const result = await messageRepository.moveToFolder(messageId, userId, FolderType.ARCHIVE)
-  
-    console.log(`[Service] Archive result:`, result) 
+
+    // console.log(`[Service] Archive result:`, result) 
     return result
   }
 
 
   async moveToFolder(messageId: string, userId: string, targetFolder: string) {
-    console.log(`[Service] Moving message to folder:`, { messageId, userId, targetFolder })
+    // console.log(`[Service] Moving message to folder:`, { messageId, userId, targetFolder })
 
     // Map string to FolderType enum
     const folderMap: Record<string, FolderType> = {
@@ -452,7 +478,7 @@ class MessageService {
     }
 
     const folder = folderMap[targetFolder.toUpperCase()]
-    
+
     if (!folder) {
       throw new ValidationError(`Invalid folder: ${targetFolder}`)
     }
@@ -493,95 +519,138 @@ class MessageService {
     }
   }
 
-  
+
   async replyToMessage(originalMessageId: string, replyDto: { senderId: string; body: string; replyToAll?: boolean; attachments?: Express.Multer.File[] }) {
-  const originalMessage = await messageRepository.getMessageById(originalMessageId)
-  if (!originalMessage) throw new NotFoundError('Original message')
-  const hasAccess = originalMessage.participants.some((p) => p.userId === replyDto.senderId)
-  if (!hasAccess) throw new ForbiddenError('Cannot reply to message you do not have access to')
+    const originalMessage = await messageRepository.getMessageById(originalMessageId)
+    if (!originalMessage) throw new NotFoundError('Original message')
+    const participantRecord = originalMessage.participants.find((p) => p.userId === replyDto.senderId)
+    if (!participantRecord) throw new ForbiddenError('Cannot reply to message you do not have access to')
+    if (participantRecord.isMirrored && !participantRecord.isDirectRecipient) {
+      throw new ForbiddenError('Guardians cannot reply to mirrored student communications.')
+    }
 
-  // ✅ ADD: Mark original message as read when replying
-  await this.markAsRead(originalMessageId, replyDto.senderId)
+    // ✅ ADD: Mark original message as read when replying
+    await this.markAsRead(originalMessageId, replyDto.senderId)
 
-  const senderInfo = await userServiceClient.getUserById(replyDto.senderId)
-  const senderName = `${senderInfo.profile.firstName} ${senderInfo.profile.lastName}`
-  const senderEmail = senderInfo.email
+    const senderInfo = await userServiceClient.getUserById(replyDto.senderId)
+    const senderName = `${senderInfo.profile.firstName} ${senderInfo.profile.lastName}`
+    const senderEmail = senderInfo.email
 
-  let recipientIds: string[] = []
-  if (replyDto.replyToAll) {
-    recipientIds = originalMessage.participants
-      .filter((p) => p.recipientType !== RecipientType.BCC && p.userId !== replyDto.senderId)
-      .map((p) => p.userId)
-  } else {
-    recipientIds = [originalMessage.senderId]
-  }
-  recipientIds = [...new Set(recipientIds)]
-  if (recipientIds.length === 0) throw new ValidationError('No valid recipients for reply')
+    let recipientIds: string[] = []
+    if (replyDto.replyToAll) {
+      recipientIds = originalMessage.participants
+        .filter((p) => p.recipientType !== RecipientType.BCC && p.userId !== replyDto.senderId)
+        .map((p) => p.userId)
+    } else {
+      recipientIds = [originalMessage.senderId]
+    }
+    recipientIds = [...new Set(recipientIds)]
+    if (recipientIds.length === 0) throw new ValidationError('No valid recipients for reply')
 
-  let uploadedAttachments: any[] = []
-  if (replyDto.attachments && replyDto.attachments.length > 0) {
-    uploadedAttachments = await cloudinaryService.uploadMultiple(replyDto.attachments)
-  }
+    let uploadedAttachments: any[] = []
+    if (replyDto.attachments && replyDto.attachments.length > 0) {
+      uploadedAttachments = await cloudinaryService.uploadMultiple(replyDto.attachments)
+    }
 
-  const threadId = originalMessage.threadId || originalMessage.id
-  const subject = originalMessage.subject.startsWith('Re: ') ? originalMessage.subject : `Re: ${originalMessage.subject}`
+    const parentMapping = new Map<string, string>() // parentId -> studentId
+    const isConfidential = originalMessage.isConfidential || false
+    if (!isConfidential) {
+      const studentIds = new Set([...recipientIds])
+      const parentPromises = Array.from(studentIds).map(async id => {
+        try {
+          const pIds = await userServiceClient.getParentsByStudentId(id)
+          return { studentId: id, pIds: pIds || [] }
+        } catch {
+          return { studentId: id, pIds: [] }
+        }
+      })
+      const parentResults = await Promise.all(parentPromises)
+      parentResults.forEach(({ studentId, pIds }) => {
+        pIds.forEach(pid => parentMapping.set(pid, studentId))
+      })
+    }
 
-  // ✅ USE TRANSACTION to ensure all operations complete
-  const result = await prisma.$transaction(async (tx) => {
-    const replyMessage = await tx.message.create({
-      data: {
-        senderId: replyDto.senderId,
-        senderName,
-        senderEmail,
-        subject,
-        body: replyDto.body,
-        type: originalMessage.type,
+    const threadId = originalMessage.threadId || originalMessage.id
+    const subject = originalMessage.subject.startsWith('Re: ') ? originalMessage.subject : `Re: ${originalMessage.subject}`
+
+    // ✅ USE TRANSACTION to ensure all operations complete
+    const result = await prisma.$transaction(async (tx) => {
+      const replyMessage = await tx.message.create({
+        data: {
+          senderId: replyDto.senderId,
+          senderName,
+          senderEmail,
+          subject,
+          body: replyDto.body,
+          type: originalMessage.type,
+          threadId,
+          isConfidential
+        }
+      })
+
+      const participants: any[] = []
+      participants.push({
+        messageId: replyMessage.id,
+        userId: replyDto.senderId,
+        recipientType: RecipientType.SENDER,
+        folder: FolderType.SENT,
+        readAt: new Date(), // ✅ ADD: Sender has read their own sent message
+        isMirrored: false,
+        mirroredFromUserId: null,
+        isDirectRecipient: true
+      })
+      recipientIds.forEach((recipientId) => {
+        participants.push({
+          messageId: replyMessage.id,
+          userId: recipientId,
+          recipientType: RecipientType.TO,
+          folder: FolderType.INBOX,
+          isMirrored: false,
+          mirroredFromUserId: null,
+          isDirectRecipient: true
+        })
+      })
+
+      // Add mirrored parents
+      parentMapping.forEach((studentId, parentId) => {
+        if (parentId !== replyDto.senderId) {
+          participants.push({
+            messageId: replyMessage.id,
+            userId: parentId,
+            recipientType: RecipientType.BCC,
+            folder: FolderType.INBOX,
+            isMirrored: true,
+            mirroredFromUserId: studentId,
+            isDirectRecipient: false
+          })
+        }
+      })
+
+      await tx.messageParticipant.createMany({ data: participants })
+
+      if (uploadedAttachments.length > 0) {
+        await tx.attachment.createMany({
+          data: uploadedAttachments.map((att) => ({
+            messageId: replyMessage.id,
+            filename: att.filename,
+            url: att.url,
+            mimeType: att.mimeType,
+            size: att.size,
+            cloudinaryId: att.cloudinaryId,
+          }))
+        })
+      }
+
+      return {
+        messageId: replyMessage.id,
         threadId,
+        recipientCount: recipientIds.length,
+        attachmentCount: uploadedAttachments.length,
       }
     })
 
-    const participants: any[] = []
-    participants.push({
-      messageId: replyMessage.id,
-      userId: replyDto.senderId,
-      recipientType: RecipientType.SENDER,
-      folder: FolderType.SENT,
-      readAt: new Date(), // ✅ ADD: Sender has read their own sent message
-    })
-    recipientIds.forEach((recipientId) => {
-      participants.push({
-        messageId: replyMessage.id,
-        userId: recipientId,
-        recipientType: RecipientType.TO,
-        folder: FolderType.INBOX,
-      })
-    })
-
-    await tx.messageParticipant.createMany({ data: participants })
-
-    if (uploadedAttachments.length > 0) {
-      await tx.attachment.createMany({
-        data: uploadedAttachments.map((att) => ({
-          messageId: replyMessage.id,
-          filename: att.filename,
-          url: att.url,
-          mimeType: att.mimeType,
-          size: att.size,
-          cloudinaryId: att.cloudinaryId,
-        }))
-      })
-    }
-
-    return {
-      messageId: replyMessage.id,
-      threadId,
-      recipientCount: recipientIds.length,
-      attachmentCount: uploadedAttachments.length,
-    }
-  })
-
-  return result
-}
+    return result
+  }
 
 
   async getReadReceipts(messageId: string, requesterId: string) {
@@ -590,7 +659,7 @@ class MessageService {
     if (message.senderId !== requesterId) throw new ForbiddenError('Only sender can view read receipts')
     const receipts = await readReceiptRepository.getReadReceiptsByMessageId(messageId)
     const totalRecipients = message.participants.filter((p) => p.recipientType !== RecipientType.SENDER).length
-    
+
     // ✅ Batch fetch receipt user info
     const userIds = receipts.map((r: any) => r.userId)
     const users = await userServiceClient.getUsersByIds(userIds)

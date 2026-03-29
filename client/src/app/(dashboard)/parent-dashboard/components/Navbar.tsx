@@ -6,7 +6,7 @@ import NotificationBell from '../../../../../components/NotificationBell';
 
 export default function Navbar() {
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10">
+    <header className="h-16 shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
       {/* Search Bar */}
       <div className="flex-1 max-w-2xl">
         <div className="relative">

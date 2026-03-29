@@ -29,7 +29,7 @@ export async function startTaskEventsConsumer() {
   });
 }
 async function handleTaskCreated(data: any) {
-  console.log('📝 Processing task created:', data);
+  // console.log('📝 Processing task created:', data);
   const { taskId, courseId, courseName, courseCode, title, description, dueDate, maxMarks } = data;
 
   // Build display name — falls back gracefully for older events without course info
@@ -38,7 +38,7 @@ async function handleTaskCreated(data: any) {
     : courseName || courseId;
   const enrollments = await getEnrolledStudents(courseId);
   if (!enrollments || enrollments.length === 0) {
-    console.log('No students enrolled in this course');
+    // console.log('No students enrolled in this course');
     return;
   }
   const results = await Promise.allSettled(
@@ -77,10 +77,10 @@ async function handleTaskCreated(data: any) {
   if (failed.length > 0) {
     console.error(`⚠️ ${failed.length} notification(s) failed:`, failed.map((r: any) => r.reason?.message));
   }
-  console.log(`✅ Task created notifications sent to ${enrollments.length} students`);
+  // console.log(`✅ Task created notifications sent to ${enrollments.length} students`);
 }
 async function handleTaskGraded(data: any) {
-  console.log('✅ Processing task graded:', data);
+  // console.log('✅ Processing task graded:', data);
   const { taskId, submissionId, studentId, marks, feedback, taskTitle } = data;
   const student = await getStudentById(studentId);
   if (!student || !student.userId) {
@@ -101,10 +101,10 @@ async function handleTaskGraded(data: any) {
       taskTitle,
     }
   );
-  console.log('✅ Task graded notification sent');
+  // console.log('✅ Task graded notification sent');
 }
 async function handleDeadlineExtended(data: any) {
-  console.log('📅 Processing deadline extended:', data);
+  // console.log('📅 Processing deadline extended:', data);
   const { taskId, studentId, taskTitle, oldDueDate, newDueDate } = data;
   const student = await getStudentById(studentId);
   if (!student || !student.userId) {
@@ -132,10 +132,10 @@ async function handleDeadlineExtended(data: any) {
       newDueDate,
     }
   );
-  console.log('✅ Deadline extended notification sent');
+  // console.log('✅ Deadline extended notification sent');
 }
 async function handleResubmissionGranted(data: any) {
-  console.log('🔄 Processing resubmission granted:', data);
+  // console.log('🔄 Processing resubmission granted:', data);
   const { taskId, studentId, taskTitle } = data;
   const student = await getStudentById(studentId);
   if (!student || !student.userId) {
@@ -152,5 +152,5 @@ async function handleResubmissionGranted(data: any) {
       taskTitle,
     }
   );
-  console.log('✅ Resubmission granted notification sent');
+  // console.log('✅ Resubmission granted notification sent');
 }

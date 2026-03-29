@@ -32,7 +32,7 @@ async function getStudentsForCourse(courseId: string, token?: string) {
       timeout: 5000,
       headers,
     });
-    console.log(`[DEBUG] Got students for course ${courseId}:`, response.data.data);
+    // console.log(`[DEBUG] Got students for course ${courseId}:`, response.data.data);
     return response.data.data || [];
   } catch (error: any) {
     console.error('Error fetching students:', error.message);
@@ -49,7 +49,7 @@ async function verifyTeacherCourse(teacherId: string, courseId: string, token?: 
       headers,
     });
     const courses = response.data.data || [];
-    console.log(`[DEBUG] Teacher ${teacherId} teaches these courses:`, courses.map((c: any) => c.id));
+    // console.log(`[DEBUG] Teacher ${teacherId} teaches these courses:`, courses.map((c: any) => c.id));
     return courses.some((course: any) => course.id === courseId);
   } catch (error: any) {
     console.error('Error verifying teacher course:', error.message);
@@ -106,7 +106,7 @@ export async function startSession(
     if (students.length === 0) {
       console.warn(`⚠️ No students enrolled in course ${data.courseId}`);
     } else {
-      console.log(`[DEBUG] Creating AttendanceRecords for ${students.length} students`);
+      // console.log(`[DEBUG] Creating AttendanceRecords for ${students.length} students`);
 
       await prisma.attendanceRecord.createMany({
         data: students.map((student: any) => {
@@ -223,18 +223,18 @@ export async function createAttendanceSession(
       status: 'ACTIVE'
     }
   });
-  console.log(`[DEBUG] Created attendance session ${session.id} for course ${data.courseId}`);
+  // console.log(`[DEBUG] Created attendance session ${session.id} for course ${data.courseId}`);
   const students = await getStudentsForCourse(data.courseId, token);
   if (students.length === 0) {
     console.warn(`No students enrolled in course ${data.courseId}`);
   } else {
-    console.log(`[DEBUG] Creating AttendanceRecords for these studentIds:`, students.map((s: any) => s.id || s.userId));
+    // console.log(`[DEBUG] Creating AttendanceRecords for these studentIds:`, students.map((s: any) => s.id || s.userId));
   }
   if (students.length > 0) {
     await prisma.attendanceRecord.createMany({
       data: students.map((student: any) => {
         const usedId = student.id || student.userId;
-        console.log(`[DEBUG] AttendanceRecord for studentId:`, usedId, 'enrollmentNumber:', student.enrollmentNumber);
+        // console.log(`[DEBUG] AttendanceRecord for studentId:`, usedId, 'enrollmentNumber:', student.enrollmentNumber);
         return ({
           sessionId: session.id,
           studentId: usedId,

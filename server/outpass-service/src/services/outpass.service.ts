@@ -53,6 +53,19 @@ export async function createOutpassRequest(data: any, file?: Express.Multer.File
     throw err;
   }
 
+  // ✅ NEW: Block DAY_PASS creation outside of 6:00 AM to 6:59 PM
+  if (data.type === 'DAY_PASS' && data.outgoingDateTime) {
+    const timeMatch = data.outgoingDateTime.match(/T(\d{2}):/);
+    if (timeMatch) {
+      const hours = parseInt(timeMatch[1], 10);
+      if (hours >= 19 || hours < 6) {
+        const err: any = new Error("Daypass not allowed between 7 PM and 6 AM");
+        err.statusCode = 400; // Bad Request
+        throw err;
+      }
+    }
+  }
+
   let proofData = null;
   if (file) proofData = await uploadProofDocument(file);
 
@@ -111,7 +124,7 @@ export async function getAllOutpasses(filters?: any) {
 
 // ==================== Get Pending Outpasses for Parent ====================
 export async function getPendingForParent(studentIds: string[]) {
-  return await prisma.outpassRequest.findMany({
+  const outpasses = await prisma.outpassRequest.findMany({
     where: {
       studentId: { in: studentIds },
       parentApproval: ApprovalStatus.PENDING,
@@ -119,6 +132,53 @@ export async function getPendingForParent(studentIds: string[]) {
     },
     orderBy: { createdAt: 'desc' },
   });
+
+  if (outpasses.length === 0) return [];
+
+  // Enrich with student info including hostelAssigned
+  const students = await prisma.$queryRaw<
+    Array<{
+      id: string;
+      firstName: string;
+      lastName: string;
+      enrollmentNumber: string | null;
+      hostelAssigned: boolean;
+      hostelName: string | null;
+      email: string;
+    }>
+  >`
+    SELECT
+      sp.id,
+      sp."firstName",
+      sp."lastName",
+      sp."enrollmentNumber",
+      sp."hostelAssigned",
+      sp."hostelName",
+      u.email
+    FROM public."StudentProfile" sp
+    JOIN public."User" u ON u.id = sp."userId"
+    WHERE sp.id = ANY(${studentIds})
+  `;
+
+  const studentMap = new Map(
+    students.map(s => [
+      s.id,
+      {
+        firstName:        s.firstName,
+        lastName:         s.lastName,
+        name:             `${s.firstName} ${s.lastName}`,
+        enrollmentNumber: s.enrollmentNumber,
+        hostelAssigned:   s.hostelAssigned,
+        hostelName:       s.hostelName,
+        email:            s.email,
+      },
+    ])
+  );
+
+  return outpasses.map(o => ({
+    ...o,
+    student: studentMap.get(o.studentId) ?? null,
+  }));
 }
 
 // ==================== Get All Outpasses for Warden ====================
@@ -191,13 +251,23 @@ export async function getOutpassesForWarden() {
 
 
 // ==================== Parent Approval ====================
-export async function parentApproval(outpassId: string, action: 'APPROVE' | 'REJECT') {
+export async function parentApproval(
+  outpassId: string,
+  action: 'APPROVE' | 'REJECT',
+  allowedStudentIds?: string[]
+) {
   const outpass = await prisma.outpassRequest.findUnique({ where: { id: outpassId } });
 
   if (!outpass) throw new Error('Outpass not found');
 
-  if (outpass.parentApproval !== ApprovalStatus.PENDING) {
-    throw new Error('Parent has already processed this request');
+  if (allowedStudentIds && allowedStudentIds.length > 0) {
+    if (!allowedStudentIds.includes(outpass.studentId)) {
+      throw new Error('You are not authorized to approve/reject this outpass');
+    }
+  }
+
+if (outpass.status !== OutpassStatus.PENDING || outpass.parentApproval !== ApprovalStatus.PENDING) {
+      throw new Error('Outpass is no longer pending parent approval');
   }
 
   const approval = action === 'APPROVE' ? ApprovalStatus.APPROVED : ApprovalStatus.REJECTED;
@@ -396,7 +466,7 @@ export async function searchStudents(searchQuery: string) {
   }
 
   const searchTerm = `%${searchQuery.trim().toLowerCase()}%`;
-  
+
   const students = await prisma.$queryRaw<Array<{
     id: string;
     userId: string;
@@ -505,7 +575,7 @@ export async function wardenDeleteOutpass(outpassId: string, reason?: string) {
     console.error('Failed to publish outpass deletion event:', error);
   }
 
-  return { 
+  return {
     message: 'Outpass deleted successfully by warden',
     deletedOutpass: {
       id: outpass.id,
@@ -524,7 +594,7 @@ export async function forceDeleteActiveOutpass(outpassId: string, wardenReason: 
   if (!outpass) throw new Error('Outpass not found');
 
   const now = new Date();
-  const isActive = 
+  const isActive =
     outpass.status === OutpassStatus.APPROVED &&
     outpass.outgoingDate <= now &&
     outpass.returningDate >= now;
@@ -559,7 +629,7 @@ export async function forceDeleteActiveOutpass(outpassId: string, wardenReason: 
     console.error('Failed to publish force deletion event:', error);
   }
 
-  return { 
+  return {
     message: `${isActive ? 'Active' : ''} Outpass deleted by warden`,
     deletedOutpass: {
       id: outpass.id,

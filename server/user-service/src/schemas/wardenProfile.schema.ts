@@ -20,3 +20,8 @@ export const wardenProfileSchema = z.object({
   state: z.string().optional(),
 });
 export type WardenProfileInput = z.infer<typeof wardenProfileSchema>;
+
+export const assignWardenHostelSchema = z.object({
+  hostelAssigned: z.string().min(1, "Assigned hostel name is required"),
+});
+export type AssignWardenHostelInput = z.infer<typeof assignWardenHostelSchema>;

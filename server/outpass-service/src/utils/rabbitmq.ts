@@ -43,7 +43,7 @@ export async function publishEvent(
       persistent: true,
       contentType: 'application/json',
     });
-    console.log(`📤 Published event: ${routingKey}`);
+    // console.log(`📤 Published event: ${routingKey}`);
   } catch (error) {
     console.error('Error publishing event:', error);
   }

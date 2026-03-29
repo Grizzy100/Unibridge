@@ -6,9 +6,10 @@ class MailController {
   async sendMessage(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.userId
-      
+      const role = req.user!.role
+
       // Destructure raw body
-      let { targets, ccTargets, bccTargets, subject, body, type } = req.body
+      let { targets, ccTargets, bccTargets, subject, body, type, isConfidential } = req.body
       const attachments = req.files as Express.Multer.File[] | undefined
 
       // ✅ FIX: Parse JSON strings from FormData
@@ -19,7 +20,7 @@ class MailController {
             return JSON.parse(data)
           } catch (e) {
             console.error('Failed to parse JSON field:', data)
-            return [] 
+            return []
           }
         }
         return data
@@ -29,18 +30,27 @@ class MailController {
       const cleanCC = parseJSON(ccTargets)
       const cleanBCC = parseJSON(bccTargets)
 
-      const result = await messageService.sendMessage({
-        senderId: userId,
-        targets: Array.isArray(cleanTargets) ? cleanTargets : [],
-        ccTargets: Array.isArray(cleanCC) ? cleanCC : [],
-        bccTargets: Array.isArray(cleanBCC) ? cleanBCC : [],
-        subject,
-        body,
-        type,
-        attachments,
-      })
+      // ✅ Strict Backend Rules for Parents
+      if (role === 'PARENT') {
+        const hasInvalidTarget = cleanTargets.some((t: any) => t.kind !== 'ROLE' || t.value !== 'WARDEN')
+        if (hasInvalidTarget) {
+           return res.status(403).json({ success: false, error: 'Parents can only message Wardens.' })
+        }
+      }
 
-      res.status(201).json({ success: true, data: result })
+    const result = await messageService.sendMessage({
+      senderId: userId,
+      targets: Array.isArray(cleanTargets) ? cleanTargets : [],
+      ccTargets: Array.isArray(cleanCC) ? cleanCC : [],
+      bccTargets: Array.isArray(cleanBCC) ? cleanBCC : [],
+      subject,
+      body,
+      type,
+      attachments,
+      isConfidential: isConfidential === 'true' || isConfidential === true
+    })
+
+    res.status(201).json({ success: true, data: result })
     } catch (error) {
       next(error)
     }
@@ -139,11 +149,11 @@ class MailController {
       const page = Number(req.query.page) || 1
       const limit = Number(req.query.limit) || 20
 
-      console.log(`[Controller] Get archive request:`, { userId, page, limit })
+      // console.log(`[Controller] Get archive request:`, { userId, page, limit })
 
       const result = await messageService.getArchive(userId, page, limit)
 
-      console.log(`[Controller] Archive folder returned ${result.messages.length} messages`)
+      // console.log(`[Controller] Archive folder returned ${result.messages.length} messages`)
 
       res.json({
         success: true,
@@ -202,11 +212,11 @@ class MailController {
       const { messageId } = req.params
       const userId = req.user!.userId
 
-      console.log(`[Controller] Archive request:`, { messageId, userId })
+      // console.log(`[Controller] Archive request:`, { messageId, userId })
 
       await messageService.moveToArchive(messageId, userId)
 
-      console.log(`[Controller] Archive successful`)
+      // console.log(`[Controller] Archive successful`)
 
       res.json({
         success: true,
@@ -219,36 +229,36 @@ class MailController {
   }
 
 
-    async moveMessageToFolder(req: Request, res: Response, next: NextFunction) {
-      try {
-        const { messageId } = req.params
-        const { folder } = req.body
-        const userId = req.user!.userId
+  async moveMessageToFolder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { messageId } = req.params
+      const { folder } = req.body
+      const userId = req.user!.userId
 
-        // Validate folder
-        const validFolders = ['INBOX', 'SENT', 'DRAFT', 'TRASH', 'ARCHIVE']
-        if (!folder || !validFolders.includes(folder.toUpperCase())) {
-          return res.status(400).json({
-            success: false,
-            error: 'Invalid folder. Must be one of: INBOX, SENT, DRAFT, TRASH, ARCHIVE'
-          })
-        }
-
-        console.log(`[Controller] Moving message ${messageId} to folder: ${folder}`)
-
-        await messageService.moveToFolder(messageId, userId, folder.toUpperCase())
-
-        console.log(`[Controller] Move successful`)
-
-        res.json({
-          success: true,
-          data: { message: `Message moved to ${folder} successfully` }
+      // Validate folder
+      const validFolders = ['INBOX', 'SENT', 'DRAFT', 'TRASH', 'ARCHIVE']
+      if (!folder || !validFolders.includes(folder.toUpperCase())) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid folder. Must be one of: INBOX, SENT, DRAFT, TRASH, ARCHIVE'
         })
-      } catch (error) {
-        console.error(`[Controller] Move to folder failed:`, error)
-        next(error)
       }
+
+      // console.log(`[Controller] Moving message ${messageId} to folder: ${folder}`)
+
+      await messageService.moveToFolder(messageId, userId, folder.toUpperCase())
+
+      // console.log(`[Controller] Move successful`)
+
+      res.json({
+        success: true,
+        data: { message: `Message moved to ${folder} successfully` }
+      })
+    } catch (error) {
+      console.error(`[Controller] Move to folder failed:`, error)
+      next(error)
     }
+  }
 
   async permanentDelete(req: Request, res: Response, next: NextFunction) {
     try {

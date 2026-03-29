@@ -17,13 +17,6 @@ app.use(
 )
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true, limit: '50mb' }))
-// Request logging in development
-if (config.server.isDev) {
-  app.use((req, res, next) => {
-    console.log(`${req.method} ${req.path}`)
-    next()
-  })
-}
 // Health check
 app.get('/health', (req, res) => {
   res.json({
@@ -53,13 +46,8 @@ async function startServer() {
     validateConfig()
     // Test database connection
     await prisma.$connect()
-    console.log('Database connected successfully')
     // Start listening
-    app.listen(config.server.port, () => {
-      console.log(
-        `Mail service running on port ${config.server.port} in ${config.server.env} mode`
-      )
-    })
+    app.listen(config.server.port)
   } catch (error: any) {
     console.error('Failed to start server:', error.message)
     process.exit(1)

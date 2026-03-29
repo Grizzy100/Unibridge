@@ -115,7 +115,7 @@ export async function startSession(req: Request, res: Response) {
 export async function refreshQr(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const result = refreshQrSchema.safeParse(req.body);
+    const result = refreshQrSchema.safeParse(req.body ?? {});
     
     if (!result.success) {
       return res.status(400).json({ 

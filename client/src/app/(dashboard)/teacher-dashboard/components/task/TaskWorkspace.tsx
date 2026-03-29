@@ -462,7 +462,7 @@ function uiStatus(task: UiTask, submission: TaskSubmission | null, nowMs: number
     submission?.customDueDate || task.dueDate
   ).getTime()
 
-  // 1️⃣ No submission yet
+  // 1️⃣ No submission yet (or explicitly PENDING with no file)
   if (!submission || submission.status === "PENDING") {
     if (nowMs > deadlineMs) {
       return { text: "Overdue", tone: "danger" as const }
@@ -470,24 +470,7 @@ function uiStatus(task: UiTask, submission: TaskSubmission | null, nowMs: number
     return { text: "Pending", tone: "muted" as const }
   }
 
-  // 2️⃣ Submitted AFTER deadline → always Overdue (even if graded)
-  const submittedAtMs = submission.submittedAt
-    ? new Date(submission.submittedAt).getTime()
-    : null
-
-  if (submittedAtMs && submittedAtMs > deadlineMs) {
-    return { text: "Overdue", tone: "danger" as const }
-  }
-
-  // 3️⃣ Normal flow
-  if (submission.status === "SUBMITTED") {
-    return { text: "Submitted", tone: "ok" as const }
-  }
-
-  if (submission.status === "RESUBMITTING") {
-    return { text: "Resubmitting", tone: "info" as const }
-  }
-
+  // 2️⃣ GRADED — always show grade, regardless of when it was submitted
   if (submission.status === "GRADED") {
     return {
       text: `Graded ${submission.marks ?? 0}/${task.maxMarks ?? 5}`,
@@ -495,7 +478,27 @@ function uiStatus(task: UiTask, submission: TaskSubmission | null, nowMs: number
     }
   }
 
-  // fallback
+  // 3️⃣ LATE status — submitted but marked late by server
+  if (submission.status === "LATE") {
+    return { text: "Late", tone: "danger" as const }
+  }
+
+  // 4️⃣ Submitted on time
+  if (submission.status === "SUBMITTED") {
+    const submittedAtMs = submission.submittedAt
+      ? new Date(submission.submittedAt).getTime()
+      : null
+    if (submittedAtMs && submittedAtMs > deadlineMs) {
+      return { text: "Late", tone: "danger" as const }
+    }
+    return { text: "Submitted", tone: "ok" as const }
+  }
+
+  // 5️⃣ Resubmitting
+  if (submission.status === "RESUBMITTING") {
+    return { text: "Resubmitting", tone: "info" as const }
+  }
+
   return { text: "Unknown", tone: "muted" as const }
 }
 

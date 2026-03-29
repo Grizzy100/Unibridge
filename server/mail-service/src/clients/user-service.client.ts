@@ -25,8 +25,6 @@ class UserServiceClient {
   private client: AxiosInstance
 
   constructor() {
-    console.log("🔹 UserServiceClient initialized with Base URL:", config.services.userServiceUrl)
-
     this.client = axios.create({
       baseURL: config.services.userServiceUrl,
       timeout: 10000,
@@ -41,21 +39,14 @@ class UserServiceClient {
   async getUserByEmail(email: string): Promise<UserInfo | null> {
     try {
       const cleanEmail = email.trim().toLowerCase()
-
-      console.log(`📡 [MailService] Requesting User Lookup for: ${cleanEmail}...`)
-
       const url = "/api/email/lookup"
-      console.log(`   -> GET ${config.services.userServiceUrl}${url}?email=${cleanEmail}`)
 
       const { data } = await this.client.get(url, {
         params: { email: cleanEmail }
       })
 
-      console.log("   <- Response Status:", data.success ? "SUCCESS" : "FAILED")
-
       if (data.success && data.data) {
         const u = data.data
-        console.log(`✅ [MailService] User Found: ID=${u.id} Role=${u.role}`)
 
         return {
           id: u.id,
@@ -75,17 +66,9 @@ class UserServiceClient {
         console.error(`❌ [MailService] HTTP Error: ${error.response.status} ${error.response.statusText}`)
 
         if (error.response.status === 404) {
-          console.warn(`   (This means User Service checked the DB and found nothing)`)
           return null
         }
 
-        if (error.response.status === 401) {
-          console.warn("   (Unauthorized: check X-Service-Key and SERVICE_KEY env values)")
-        }
-
-        if (error.response.status === 403) {
-          console.warn("   (Forbidden: if using JWT admin auth, role must be ADMIN)")
-        }
       } else if (error.request) {
         console.error("❌ [MailService] Network Error: No response received from User Service.")
         console.error(`   Is User Service running at ${config.services.userServiceUrl}?`)

@@ -54,7 +54,7 @@ export async function getStudentProfileIdFromUserId(
     // ✅ FIXED: Match user-service route /api/profile/students/:userId
     const url = `${USER_SERVICE_URL}/api/profile/students/${userId}`;
     
-    console.log('Fetching student profile from:', url);
+    // console.log('Fetching student profile from:', url);
     
     const response = await axios.get<ApiResponse<StudentProfile>>(url, {
       headers: getHeaders(token),
@@ -71,7 +71,7 @@ export async function getStudentProfileIdFromUserId(
       throw new Error('Student profile ID is missing');
     }
 
-    console.log('Found student profile ID:', studentProfile.id);
+    // console.log('Found student profile ID:', studentProfile.id);
     
     return studentProfile.id;
   } catch (error: unknown) {
@@ -97,7 +97,7 @@ export async function getTeacherCourses(
     // ✅ This should already work since courses are mounted at /api
     const url = `${USER_SERVICE_URL}/api/teachers/${userId}/courses`;
     
-    console.log('Fetching teacher courses from:', url);
+    // console.log('Fetching teacher courses from:', url);
     
     const response = await axios.get<ApiResponse<Course[]>>(url, {
       headers: getHeaders(token),
@@ -106,7 +106,7 @@ export async function getTeacherCourses(
 
     const courses = response.data?.data ?? [];
     
-    console.log(`Found ${courses.length} courses for teacher`);
+    // console.log(`Found ${courses.length} courses for teacher`);
     
     return courses;
   } catch (error: unknown) {
@@ -132,8 +132,8 @@ export async function getStudentCourses(
     // ✅ This should already work since courses are mounted at /api
     const url = `${USER_SERVICE_URL}/api/students/${studentUserId}/courses`;
     
-    console.log('Fetching student courses from:', url);
-    console.log('Using student User ID:', studentUserId);
+    // console.log('Fetching student courses from:', url);
+    // console.log('Using student User ID:', studentUserId);
     
     const response = await axios.get<ApiResponse<Course[]>>(url, {
       headers: getHeaders(token),
@@ -142,7 +142,7 @@ export async function getStudentCourses(
 
     const courses = response.data?.data ?? [];
     
-    console.log(`Found ${courses.length} courses for student`);
+    // console.log(`Found ${courses.length} courses for student`);
     
     return courses;
   } catch (error: unknown) {

@@ -156,6 +156,36 @@ export async function getMyTasks(req: Request, res: Response) {
   }
 }
 
+export async function getTasksForStudent(req: Request, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const { studentUserId } = req.params;
+    const token = req.headers.authorization?.replace('Bearer ', '');
+
+    const tasks = await taskService.getStudentTasks(studentUserId, token);
+
+    return res.json({
+      success: true,
+      data: tasks,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    console.error('Error in getTasksForStudent controller:', errorMessage);
+
+    return res.status(500).json({
+      success: false,
+      message: errorMessage,
+    });
+  }
+}
+
 export async function extendTask(req: Request, res: Response) {
   try {
     if (!req.user) {

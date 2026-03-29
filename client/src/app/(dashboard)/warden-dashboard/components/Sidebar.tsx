@@ -10,6 +10,7 @@ import {
 } from "react-icons/fi"
 import { HiAcademicCap } from "react-icons/hi2";
 import { MdOutlineTaskAlt } from "react-icons/md"
+import { clearAuth } from "../../../../../lib/auth";
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -27,16 +28,18 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="w-60 bg-white border-r flex flex-col">
+    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0">
       {/* Logo */}
-      <div className="h-16 flex items-center gap-2 px-6 font-bold text-lg tracking-tight">
-        <HiAcademicCap className="text-slate-900 text-2xl" />
-        <span>UniBridge</span>
+      <div className="h-16 flex items-center gap-2 px-6 border-b border-gray-200">
+        <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+          <HiAcademicCap className="text-white text-base" />
+        </div>
+        <span className="font-semibold text-base text-gray-900">WardenHub</span>
       </div>
 
       {/* Main Nav */}
-      <nav className="flex-1 px-3 space-y-1">
-        <div className="px-3 pt-2 pb-1 text-xs font-semibold text-slate-400 uppercase">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-3">
           Dashboard
         </div>
 
@@ -48,21 +51,26 @@ export default function Sidebar() {
             <button
               key={it.path}
               onClick={() => router.push(it.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition
+              className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                 ${
                   active
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-700 hover:bg-slate-100"
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                 }`}
             >
-              <Icon className="text-base" />
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors
+                  ${active ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600"}`}
+              >
+                <Icon className="text-base" />
+              </span>
               {it.label}
             </button>
           )
         })}
 
         {/* Upcoming / Disabled */}
-        <div className="px-3 pt-5 pb-1 text-xs font-semibold text-slate-400 uppercase">
+        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 pt-5 pb-1">
           Management
         </div>
 
@@ -71,9 +79,11 @@ export default function Sidebar() {
           return (
             <div
               key={it.label}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 cursor-not-allowed"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 cursor-not-allowed"
             >
-              <Icon className="text-base" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-400">
+                <Icon className="text-base" />
+              </span>
               {it.label}
               <span className="ml-auto text-xs italic">soon</span>
             </div>
@@ -82,12 +92,17 @@ export default function Sidebar() {
       </nav>
 
       {/* Logout */}
-      <div className="p-3 border-t">
+      <div className="px-4 py-4 border-t border-gray-200 pb-8">
         <button
-          onClick={() => router.push("/login")}
-          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-100"
+          onClick={() => {
+            clearAuth();
+            router.push("/login/warden");
+          }}
+          className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors duration-200"
         >
-          <FiLogOut />
+          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-red-50 text-red-500 group-hover:bg-red-100 transition-colors">
+            <FiLogOut className="text-base" />
+          </span>
           Logout
         </button>
       </div>

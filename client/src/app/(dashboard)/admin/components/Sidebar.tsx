@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   HiHome,
   HiAcademicCap,
@@ -10,10 +10,12 @@ import {
   HiClipboardList,
   HiCreditCard,
   HiX,
+  HiLogout,
 } from 'react-icons/hi';
 import { MdFamilyRestroom } from "react-icons/md";
 import { Button } from '../../../../../components/ui/button';
 import { cn } from '../../../../../lib/utils';
+import { clearAuth } from '../../../../../lib/auth';
 
 // ✅ FIXED: All routes start with /admin
 const menuItems = [
@@ -35,6 +37,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose, darkMode, onDarkModeToggle }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <aside

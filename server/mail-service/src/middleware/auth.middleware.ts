@@ -19,7 +19,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
         email: decoded.email,
         role: decoded.role,
       }
-      console.log('✅ Authenticated user:', req.user.userId)
       next()
     } catch (error: any) {
       if (error.name === 'JsonWebTokenError') {

@@ -35,3 +35,9 @@ export const studentProfileSchema = z.object({
   roomNumber: z.string().optional(),
 });
 export type StudentProfileInput = z.infer<typeof studentProfileSchema>;
+
+export const assignStudentHostelSchema = z.object({
+  hostelName: z.string().min(1, "Hostel name is required"),
+  roomNumber: z.string().min(1, "Room number is required"),
+});
+export type AssignStudentHostelInput = z.infer<typeof assignStudentHostelSchema>;

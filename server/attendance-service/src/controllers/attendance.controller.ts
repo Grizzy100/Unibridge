@@ -75,8 +75,40 @@ export async function getAttendanceStats(req: Request, res: Response) {
     res.status(500).json({ success: false, message: error.message });
   }
 }
+export async function getWardAttendance(req: Request, res: Response) {
+  try {
+    // Parent calls this with the ward's userId as a route param
+    const { studentUserId } = req.params;
+    const { courseId } = req.query;
+    // Forward parent token - user-service /students/:userId only requires authenticate (no role guard)
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    const attendance = await attendanceService.getStudentAttendance(
+      studentUserId,
+      courseId as string | undefined,
+      token
+    );
+    res.json({ success: true, data: attendance });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
 
-
-
-
+export async function getWardAttendanceStats(req: Request, res: Response) {
+  try {
+    const { studentUserId } = req.params;
+    const { courseId } = req.query;
+    if (!courseId) {
+      return res.status(400).json({ success: false, message: 'courseId is required' });
+    }
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    const stats = await attendanceService.calculateAttendancePercentage(
+      studentUserId,
+      courseId as string,
+      token
+    );
+    res.json({ success: true, data: stats });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
 
