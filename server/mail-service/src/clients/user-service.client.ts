@@ -257,9 +257,11 @@ class UserServiceClient {
 
   async getParentsByStudentId(studentId: string): Promise<string[]> {
     try {
-      const { data } = await this.client.get(`/api/profiles/students/${studentId}/parents`)
+      const { data } = await this.client.post(`/api/email/students/parents`, {
+        studentIds: [studentId]
+      })
       if (!data.success) return []
-      return data.data.map((p: any) => p.userId || p.id)
+      return Array.isArray(data.data) ? data.data : []
     } catch (error) {
       return []
     }

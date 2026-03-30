@@ -1,0 +1,21 @@
+services:
+  chromadb:
+    image: chromadb/chroma
+    container_name: chat-chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/data
+
+  chat-service:
+    build: .
+    container_name: chat-service
+    depends_on:
+      - chromadb
+    env_file:
+      - .env
+    ports:
+      - "3006:3006"
+
+volumes:
+  chroma_data:

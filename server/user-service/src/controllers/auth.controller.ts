@@ -28,6 +28,26 @@ export async function login(req: Request, res: Response) {
   }
 }
 
+export async function adminLogin(req: Request, res: Response) {
+  try {
+    const { email, password } = loginSchema.parse(req.body);
+    const result = await authService.adminLogin(email, password);
+    return res.json(result);
+  } catch (err: any) {
+    if (err.name === "ZodError") {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: err.errors.map((e: any) => ({
+          field: e.path.join("."),
+          message: e.message,
+        })),
+      });
+    }
+
+    return res.status(401).json({ message: err.message });
+  }
+}
+
 
 // Admin Creates User
 export async function adminCreateUser(req: Request, res: Response) {

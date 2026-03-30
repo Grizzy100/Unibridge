@@ -18,7 +18,7 @@ export async function getMyStudentProfile(): Promise<StudentProfileBasic | null>
     if (!token || !user) return null;
 
     try {
-        const res = await fetch(`${USER_SERVICE}/api/profiles/students/${user.id}`, {
+        const res = await fetch(`${USER_SERVICE}/api/profile/students/${user.id}`, {
             headers: { Authorization: `Bearer ${token}` },
             cache: 'no-store',
         });

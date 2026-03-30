@@ -32,11 +32,11 @@ export default function LoginLayout({ children }: LoginLayoutProps) {
         className="
           relative z-10
 
-          w-full
+          w-[92%] sm:w-full
           max-w-[380px]
 
-          px-8
-          py-8
+          px-6 sm:px-8
+          py-6 sm:py-8
 
           bg-white
 

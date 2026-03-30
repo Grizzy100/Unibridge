@@ -1,37 +1,59 @@
 // client/components/ProtectedRoute.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getUser, isAuthenticated } from "../lib/auth";
+import type { Role } from "../lib/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles: string[];
+  allowedRoles: Role[];
+  redirectTo?: string;
+  replace?: boolean;
 }
 
-export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+export default function ProtectedRoute({
+  children,
+  allowedRoles,
+  redirectTo = "/login",
+  replace = true,
+}: ProtectedRouteProps) {
   const router = useRouter();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  const navigate = (path: string) => {
+    if (replace) {
+      router.replace(path);
+      return;
+    }
+    router.push(path);
+  };
 
   useEffect(() => {
+    setIsHydrated(true);
+
     // Check if user is logged in
     if (!isAuthenticated()) {
-      router.push("/admin-login");
+      setIsAuthorized(false);
+      navigate(redirectTo);
       return;
     }
 
     // Check if user has correct role
     const user = getUser();
     if (!user || !allowedRoles.includes(user.role)) {
-      router.push("/admin-login");
+      setIsAuthorized(false);
+      navigate(redirectTo);
+      return;
     }
-  }, [router, allowedRoles]);
 
-  // Show nothing while checking auth
-  if (!isAuthenticated()) return null;
+    setIsAuthorized(true);
+  }, [allowedRoles, redirectTo, replace, router]);
 
-  const user = getUser();
-  if (!user || !allowedRoles.includes(user.role)) return null;
+  // Render a stable shell until hydration/auth checks complete.
+  if (!isHydrated || !isAuthorized) return null;
 
   // User is authenticated and authorized
   return <>{children}</>;

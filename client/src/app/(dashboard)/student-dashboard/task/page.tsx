@@ -164,11 +164,11 @@ export default function TaskPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8 animate-fadeIn">
+      <div className="animate-fadeIn">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Tasks</h1>
-          <p className="text-gray-500">Manage and submit your assignments</p>
+        <div className="mb-2 sm:mb-4 md:mb-5 lg:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-[1.75rem] lg:text-3xl font-bold text-gray-900 mb-0.5">Tasks</h1>
+          <p className="text-xs sm:text-base text-gray-500">Manage and submit your assignments</p>
         </div>
 
         {/* Filters */}
@@ -181,7 +181,7 @@ export default function TaskPage() {
         />
 
         {/* Task List */}
-        <div className="mt-8 space-y-4">
+        <div className="mt-2.5 sm:mt-4 md:mt-5 lg:mt-6 space-y-2 sm:space-y-3 md:space-y-4">
           {paginatedTasks.length === 0 ? (
             <div className="text-center py-20 animate-fadeIn">
               <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
@@ -197,7 +197,7 @@ export default function TaskPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 sm:space-y-4">
               {paginatedTasks.map((task, index) => (
                 <div
                   key={task.id}
@@ -217,7 +217,7 @@ export default function TaskPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-10 flex justify-center animate-fadeIn">
+          <div className="mt-5 sm:mt-6 md:mt-8 flex justify-center animate-fadeIn">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>

@@ -17,9 +17,6 @@ interface MailQueueProps {
   setType: (t: MessageType) => void
   onToggleStar: (id: string) => void
   loading?: boolean
-  currentUserRole?: string
-  parentViewTab?: "MY_MAIL" | "WARD_MAIL"
-  setParentViewTab?: (tab: "MY_MAIL" | "WARD_MAIL") => void
 }
 
 export default function MailQueue({
@@ -33,9 +30,6 @@ export default function MailQueue({
   setType,
   onToggleStar,
   loading,
-  currentUserRole,
-  parentViewTab,
-  setParentViewTab,
 }: MailQueueProps) {
   return (
     <section className="bg-white border-r border-slate-200 min-w-0 flex flex-col">
@@ -53,31 +47,6 @@ export default function MailQueue({
         <div className="mt-3">
           <TypeTabs type={type} setType={setType} />
         </div>
-
-        {currentUserRole === "PARENT" && setParentViewTab && parentViewTab && (
-          <div className="mt-4 flex rounded-md bg-slate-100 p-1">
-            <button
-              onClick={() => setParentViewTab("MY_MAIL")}
-              className={`flex-1 flex items-center justify-center py-1.5 text-xs font-medium rounded-sm transition ${
-                parentViewTab === "MY_MAIL"
-                  ? "bg-white text-slate-800 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              My Mails
-            </button>
-            <button
-              onClick={() => setParentViewTab("WARD_MAIL")}
-              className={`flex-1 flex items-center justify-center py-1.5 text-xs font-medium rounded-sm transition ${
-                parentViewTab === "WARD_MAIL"
-                  ? "bg-white text-cyan-800 shadow-sm border border-cyan-100/50"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Ward&apos;s Mails
-            </button>
-          </div>
-        )}
 
         <div className="mt-4 relative">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />

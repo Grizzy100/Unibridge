@@ -1,49 +1,42 @@
-// //client\src\app\(dashboard)\teacher-dashboard\components\Navbar.tsx
-// "use client"
-
-// import { FiSearch, FiUser } from "react-icons/fi"
-// import NotificationBell from "../../student-dashboard/components/NotificationBell"
-
-// export default function Navbar() {
-//   return (
-//     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10">
-//       <div className="flex-1 max-w-2xl">
-//         <div className="relative">
-//           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-//           <input
-//             placeholder="Search or type a command"
-//             className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm shadow-sm
-//             focus:outline-none focus:ring-4 focus:ring-slate-200 focus:border-gray-300 transition"
-//           />
-//         </div>
-//       </div>
-
-//       <div className="flex items-center gap-4 ml-6">
-//         <NotificationBell />
-//         <button className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-xl transition-colors">
-//           <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center">
-//             <FiUser className="text-white text-sm" />
-//           </div>
-//         </button>
-//       </div>
-//     </header>
-//   )
-// }
-
-
-
 //client\src\app\(dashboard)\teacher-dashboard\components\Navbar.tsx
-'use client';
-import { FiSearch, FiUser } from 'react-icons/fi';
-import NotificationBell from '../../../../../components/NotificationBell';
+"use client";
+import { FiSearch, FiUser, FiMenu } from 'react-icons/fi';
+import { BiMenuAltLeft, BiMenuAltRight } from "react-icons/bi";
+import NotificationBell from '../../../../../components/NotificationBell';      
 
-export default function Navbar() {
+interface NavbarProps {
+  onMenuClick?: () => void;
+  toggleSidebarExpand?: () => void;
+  isSidebarExpanded?: boolean;
+}
+
+export default function Navbar({ onMenuClick, toggleSidebarExpand, isSidebarExpanded = true }: NavbarProps) {
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10">
-      <div className="flex-1 max-w-2xl">
-        <div className="relative">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input placeholder="Search courses, tasks..." className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm shadow-sm focus:outline-none focus:ring-4 focus:ring-slate-200 focus:border-gray-300 transition" />
+    <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-20">
+
+      <div className="flex-1 flex max-w-xl gap-2 sm:gap-4 items-center">        
+        <button
+          onClick={onMenuClick}
+          className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100/50 hover:text-slate-900 rounded-lg transition-colors"
+          aria-label="Open Sidebar"
+        >
+          <FiMenu className="text-xl" />
+        </button>
+
+        {/* Desktop Expand/Collapse toggle */}
+        {toggleSidebarExpand && (
+          <button
+            onClick={toggleSidebarExpand}
+            className="hidden md:flex p-2 -ml-2 text-gray-500 hover:bg-gray-100/50 hover:text-slate-900 rounded-lg transition-colors"
+            aria-label="Toggle Sidebar"
+          >
+            {isSidebarExpanded ? <BiMenuAltLeft className="text-2xl" /> : <BiMenuAltRight className="text-2xl" />}
+          </button>
+        )}
+
+        <div className="relative group flex-1">
+          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input placeholder="Search courses, tasks..." className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-200/80 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 transition-all hover:bg-gray-50" />
         </div>
       </div>
 

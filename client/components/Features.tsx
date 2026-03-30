@@ -204,26 +204,26 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="py-[72px] bg-gradient-to-b from-white via-[#fcfcff] to-white">
-      <div className="max-w-[980px] mx-auto px-6">
+    <section id="features" className="py-[48px] md:py-[72px] bg-gradient-to-b from-white via-[#fcfcff] to-white">
+      <div className="max-w-[980px] mx-auto px-4 sm:px-6">
 
-        <div className="text-center mb-[48px]">
-          <p className="text-[11px] font-medium tracking-[0.08em] uppercase text-gray-500 mb-[16px]">
+        <div className="text-center mb-[36px] md:mb-[48px]">
+          <p className="text-[10px] md:text-[11px] font-medium tracking-[0.08em] uppercase text-gray-500 mb-[12px] md:mb-[16px]">
             Features
           </p>
 
-          <h2 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] leading-[1.15] text-gray-900 mb-[12px]">
+          <h2 className="text-[24px] md:text-[30px] font-semibold tracking-[-0.02em] leading-[1.15] text-gray-900 mb-[12px]">
             Powerful tools for a{" "}
             <span className="text-[#736bff]">connected campus</span>
           </h2>
 
-          <p className="text-[15px] leading-[1.6] tracking-[-0.005em] text-gray-600 max-w-[520px] mx-auto">
-            UniBridge provides a unified system to manage academic workflows,
+          <p className="text-[14px] md:text-[15px] leading-[1.6] tracking-[-0.005em] text-gray-600 max-w-[520px] mx-auto">
+            UniBridge provides a unified system to manage academic workflows,   
             communication, attendance, and performance insights across the institution.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[18px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] md:gap-[18px]">
           {features.map((feature, index) => (
             <FeatureCard
               key={index}

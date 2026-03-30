@@ -151,7 +151,10 @@ export default function NotificationBell() {
 
       {/* Panel */}
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-[400px] bg-white border border-neutral-200 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.10)] overflow-hidden">
+        <div 
+          className="fixed left-4 right-4 top-[72px] sm:absolute sm:left-auto sm:top-auto sm:right-0 z-50 sm:mt-2 sm:w-[400px] bg-white border border-neutral-200 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.10)] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 ease-out fill-mode-forwards"
+          style={{ animationDuration: '0.7s' }}
+        >
 
           {/* Header */}
           <div className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
@@ -170,7 +173,7 @@ export default function NotificationBell() {
           </div>
 
           {/* List */}
-          <div className="max-h-[440px] overflow-y-auto divide-y divide-neutral-100">
+          <div className="max-h-[440px] overflow-y-auto divide-y divide-neutral-100 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {loading && (
               <div className="py-12 text-center text-neutral-400 text-sm">Loading…</div>
             )}

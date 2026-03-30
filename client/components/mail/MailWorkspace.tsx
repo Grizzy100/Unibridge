@@ -8,6 +8,9 @@ import MailQueue from "./MailQueue"
 import MailViewer from "./MailViewer"
 import ComposePanel from "./ComposePanel"
 
+import { RiSendPlane2Line, RiFolder3Line } from "react-icons/ri"
+import { FiX, FiMenu, FiArrowLeft } from "react-icons/fi"
+
 import type { MailFolderKey, MessageType, Mail } from "./types"
 import {
   fetchFolder,
@@ -31,8 +34,6 @@ export default function MailWorkspace() {
   const [replyToMail, setReplyToMail] = useState<Mail | null>(null)  // ✅ NEW
 
   const [currentUserId, setCurrentUserId] = useState<string>("")
-  const [currentUserRole, setCurrentUserRole] = useState<string>("")
-  const [parentViewTab, setParentViewTab] = useState<"MY_MAIL" | "WARD_MAIL">("MY_MAIL")
   const [loading, setLoading] = useState(false)
   const [list, setList] = useState<Mail[]>([])
   const [counts, setCounts] = useState<Record<MailFolderKey, number>>({
@@ -42,7 +43,10 @@ export default function MailWorkspace() {
     trash: 0,
     archived: 0,
   })
-  
+
+  // Folders Sidebar mobile state
+  const [mobileFoldersOpen, setMobileFoldersOpen] = useState(false)
+
   // ✅ Action loading states
   const [archiving, setArchiving] = useState(false)
   const [trashing, setTrashing] = useState(false)
@@ -60,23 +64,12 @@ export default function MailWorkspace() {
     }
     console.log(`[MailWorkspace] User loaded: ${user.role} (${user.id})`)
     setCurrentUserId(user.id)
-    setCurrentUserRole(user.role || "")
   }, [])
 
   // Filter messages locally
   const locallyFiltered = useMemo(() => {
     const searchQuery = query.trim().toLowerCase()
     return list.filter((mail) => {
-      // Role based view filtering for parents
-      if (currentUserRole === "PARENT") {
-        if (parentViewTab === "MY_MAIL" && mail.isMirrored) {
-          return false
-        }
-        if (parentViewTab === "WARD_MAIL" && !mail.isMirrored) {
-          return false
-        }
-      }
-
       if (type !== "GENERAL" && mail.type !== type) {
         return false
       }
@@ -87,7 +80,7 @@ export default function MailWorkspace() {
         mail.fromName.toLowerCase().includes(searchQuery)
       )
     })
-  }, [list, query, type, currentUserRole, parentViewTab])
+  }, [list, query, type])
 
   // Get active mail
   const activeMail = useMemo(() => {
@@ -320,71 +313,125 @@ export default function MailWorkspace() {
   }
 
   return (
-    <div className="h-full rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm relative">
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_360px_1fr] h-full">
-        <MailFolders
-          folder={folder}
-          setFolder={(newFolder) => {
-            setFolder(newFolder)
-            setType("GENERAL")
-            setQuery("")
-            setActiveId(null)
-            setViewMode("READ")
-            setReplyToMail(null)
-          }}
-          counts={counts}
-          onCompose={handleCompose}
-        />
+    <div className="h-full rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm relative group">
 
-        <MailQueue
-          folder={folder}
-          mails={locallyFiltered}
-          query={query}
-          setQuery={setQuery}
-          activeId={activeMail?.id || null}
-          onSelect={handleSelect}
-          type={type}
-          setType={setType}
-          onToggleStar={handleToggleStar}
-          loading={loading}
-          currentUserRole={currentUserRole}
-          parentViewTab={parentViewTab}
-          setParentViewTab={setParentViewTab}
+      {/* Mobile Folders Overlay */}
+      {mobileFoldersOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden transition-opacity"
+          onClick={() => setMobileFoldersOpen(false)}
         />
+      )}
 
-        {/* ✅ Show compose panel for both COMPOSE and REPLY modes */}
-        {viewMode === "COMPOSE" || viewMode === "REPLY" ? (
-          <ComposePanel
-            replyTo={viewMode === "REPLY" ? replyToMail : null}
-            onClose={() => {
+      <div className="flex h-full relative">
+        
+        {/* Folders (Genie menu on mobile, built-in sidebar on lg) */}
+        <div className={`
+          fixed lg:static z-50 overflow-hidden
+          bottom-[calc(max(0.75rem,env(safe-area-inset-bottom))+3.5rem)] right-4 lg:bottom-auto lg:right-auto lg:top-0 lg:left-0
+          h-auto lg:h-full w-[220px] sm:w-[240px] lg:w-[220px]
+          rounded-2xl lg:rounded-none shadow-2xl lg:shadow-none
+          origin-bottom-right lg:origin-center border border-slate-200 lg:border-y-0 lg:border-l-0
+          bg-white
+          transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
+          ${mobileFoldersOpen ? "scale-100 opacity-100 translate-y-0" : "scale-0 opacity-0 translate-y-12 pointer-events-none lg:scale-100 lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto"}
+        `}>
+          <MailFolders
+            folder={folder}
+            setFolder={(newFolder) => {
+              setFolder(newFolder)
+              setType("GENERAL")
+              setQuery("")
+              setActiveId(null)
               setViewMode("READ")
               setReplyToMail(null)
+              setMobileFoldersOpen(false)
             }}
-            onSent={() => {
-              setViewMode("READ")
-              setReplyToMail(null)
-              
-              if (viewMode === "REPLY") {
-                loadFolder()
-              } else {
-                setFolder("sent")
-              }
-              
-              loadCounts()
+            counts={counts}
+            onCompose={() => {
+              handleCompose()
+              setMobileFoldersOpen(false)
             }}
           />
-        ) : (
-          <MailViewer
-            mail={activeMail}
-            onReply={handleReply}
-            onArchive={handleArchive}
-            onTrash={handleTrash}
-            onStar={() => {
-              if (activeMail) handleToggleStar(activeMail.id)
-            }}
+        </div>
+
+        {/* List / Queue View (Hidden on mobile if reading or composing) */}
+        <div className={`
+          flex-1 lg:w-[360px] lg:flex-none border-r border-slate-200 h-full
+          ${(viewMode !== "READ" || activeId) ? "hidden lg:block w-full lg:w-[360px]" : "block w-full lg:w-[360px]"}
+        `}>
+          <MailQueue
+            folder={folder}
+            mails={locallyFiltered}
+            query={query}
+            setQuery={setQuery}
+            activeId={activeMail?.id || null}
+            onSelect={handleSelect}
+            type={type}
+            setType={setType}
+            onToggleStar={handleToggleStar}
+            loading={loading}
           />
-        )}
+        </div>
+
+        {/* Detail / Compose View (Hidden on mobile if queue is showing) */}
+        <div className={`
+          flex-1 h-full min-w-0
+          ${(viewMode === "READ" && !activeId) ? "hidden lg:block" : "block"}
+        `}>
+          {viewMode === "COMPOSE" || viewMode === "REPLY" ? (
+            <ComposePanel
+              replyTo={viewMode === "REPLY" ? replyToMail : null}
+              onClose={() => {
+                setViewMode("READ")
+                setReplyToMail(null)
+              }}
+              onSent={() => {
+                setViewMode("READ")
+                setReplyToMail(null)
+
+                if (viewMode === "REPLY") {
+                  loadFolder()
+                } else {
+                  setFolder("sent")
+                }
+
+                loadCounts()
+              }}
+            />
+          ) : (
+            <MailViewer
+              mail={activeMail}
+              onReply={handleReply}
+              onArchive={handleArchive}
+              onTrash={handleTrash}
+              onStar={() => {
+                if (activeMail) handleToggleStar(activeMail.id)
+              }}
+              onClose={() => setActiveId(null)}
+            />
+          )}
+        </div>
       </div>
+
+      {/* Floating Action Buttons for Mobile (Only show on Mail Queue page) */}
+      {viewMode === "READ" && !activeId && (
+        <div className="lg:hidden fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-4 flex flex-col gap-2.5 z-50 pb-1">
+          <button 
+            onClick={() => setMobileFoldersOpen(true)}
+            className="w-11 h-11 bg-white text-slate-700 shadow-md rounded-full flex items-center justify-center border border-slate-200 hover:bg-slate-50 transition"
+          >
+             <RiFolder3Line className="text-[19px] translate-y-[1px]" />
+          </button>
+          <button 
+             onClick={handleCompose}
+             className="w-12 h-12 bg-slate-900 text-white shadow-lg rounded-full flex items-center justify-center hover:bg-slate-800 transition"
+          >
+             <RiSendPlane2Line className="text-[21px] -ml-0.5 translate-y-[1px]" />
+          </button>
+        </div>
+      )}
+
     </div>
   )
 }

@@ -99,12 +99,12 @@ export function StudentList({ type, refresh }: StudentListProps) {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Search Bar */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Input
           placeholder="Search by name, email, or enrollment..."
-          className="w-[320px] text-sm"
+          className="w-full sm:w-[320px] min-h-[44px] sm:min-h-0 text-sm bg-white"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

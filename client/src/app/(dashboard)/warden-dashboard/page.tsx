@@ -5,13 +5,13 @@ import OutpassList from "./components/outpass/OutpassList"
 
 export default function WardenHome() {
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-3 sm:gap-4">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">
-          Pending Outpass Requests
+        <h1 className="text-[1.7rem] sm:text-2xl font-semibold text-gray-900 leading-tight">
+          Pending Outpass 
         </h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-[13px] sm:text-sm text-gray-500 mt-1">
           Review and take action on student outpass requests
         </p>
       </div>

@@ -55,7 +55,7 @@ export function AddParentForm({ onClose, onSuccess }: AddParentFormProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-md w-full max-w-3xl max-h-[90vh] flex flex-col border border-gray-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Add New Parent</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-md transition">
             <X className="w-5 h-5 text-gray-500" />
@@ -63,7 +63,7 @@ export function AddParentForm({ onClose, onSuccess }: AddParentFormProps) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
           {error && (
             <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
               {error}
@@ -74,7 +74,7 @@ export function AddParentForm({ onClose, onSuccess }: AddParentFormProps) {
             {/* Account Details */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Account Details</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">Email *</Label>
                   <Input
@@ -100,7 +100,7 @@ export function AddParentForm({ onClose, onSuccess }: AddParentFormProps) {
             {/* Personal Information */}
             <div className="border-t border-gray-200 pt-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Personal Information</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">First Name *</Label>
                   <Input
@@ -150,7 +150,7 @@ export function AddParentForm({ onClose, onSuccess }: AddParentFormProps) {
                 Address (Optional)
               </summary>
               <div className="mt-3 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <Label className="text-xs text-gray-600 mb-1.5 block">Address</Label>
                     <Input
@@ -190,7 +190,7 @@ export function AddParentForm({ onClose, onSuccess }: AddParentFormProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div className="flex justify-end gap-3 px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50">
           <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancel
           </Button>

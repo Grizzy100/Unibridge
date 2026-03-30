@@ -7,6 +7,7 @@ import { Button } from '../../../../../../components/ui/button';
 import { Badge } from '../../../../../../components/ui/badge';
 import { Input } from '../../../../../../components/ui/input';
 import { ArrowLeft, Mail, Phone, Users, X } from 'lucide-react';
+import { getToken } from '../../../../../../lib/auth';
 
 interface Student {
   id: string;
@@ -51,6 +52,7 @@ export default function StudentDetailPage() {
   const params = useParams();
   const router = useRouter();
   const userId = params.userId as string;
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
   const [student, setStudent] = useState<Student | null>(null);
   const [linkedParents, setLinkedParents] = useState<ParentLink[]>([]);
@@ -60,25 +62,41 @@ export default function StudentDetailPage() {
   const [error, setError] = useState('');
   const [searchParent, setSearchParent] = useState('');
 
+  const getAuthHeaders = (useJson = false): HeadersInit => {
+    const token = getToken() || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+    if (!token) {
+      throw new Error('Authentication required. Please log in again.');
+    }
+
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    if (useJson) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    return headers;
+  };
+
   useEffect(() => {
     fetchStudentData();
-    fetchLinkedParents();
     fetchAllParents();
   }, [userId]);
 
   const fetchStudentData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/api/profiles/students/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await fetch(`${API_BASE}/profile/students/${userId}`, {
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) throw new Error('Failed to fetch student');
       
       const result = await response.json();
-      setStudent(result.data);
+      const studentData = result.data;
+      setStudent(studentData);
+      await fetchLinkedParents(studentData?.id);
       setError('');
     } catch (err: any) {
       setError(err.message || 'Failed to load student data');
@@ -87,12 +105,15 @@ export default function StudentDetailPage() {
     }
   };
 
-  const fetchLinkedParents = async () => {
+  const fetchLinkedParents = async (studentProfileId?: string) => {
+    if (!studentProfileId) {
+      setLinkedParents([]);
+      return;
+    }
+
     try {
-      const response = await fetch(`http://localhost:3001/api/profiles/students/${userId}/parents`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await fetch(`${API_BASE}/profile/students/${studentProfileId}/parents`, {
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) throw new Error('Failed to fetch linked parents');
@@ -106,10 +127,8 @@ export default function StudentDetailPage() {
 
   const fetchAllParents = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/profiles/parents`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await fetch(`${API_BASE}/profile/parents`, {
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) throw new Error('Failed to fetch parents');
@@ -123,13 +142,9 @@ export default function StudentDetailPage() {
 
   const handleLinkParent = async (parentId: string, relationship: string, isPrimary: boolean) => {
     try {
-      // ✅ FIXED: Added /profiles prefix
-      const response = await fetch('http://localhost:3001/api/profiles/parent-student-link', {
+      const response = await fetch(`${API_BASE}/profile/parent-student-link`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({
           parentId: parentId,
           studentId: student?.id,
@@ -143,7 +158,7 @@ export default function StudentDetailPage() {
         throw new Error(error.message || 'Failed to link parent');
       }
 
-      await fetchLinkedParents();
+      await fetchLinkedParents(student?.id);
       setShowLinkModal(false);
       setSearchParent('');
     } catch (err: any) {
@@ -155,12 +170,9 @@ export default function StudentDetailPage() {
     if (!confirm('Are you sure you want to unlink this parent?')) return;
 
     try {
-      // ✅ FIXED: Added /profiles prefix
-      const response = await fetch(`http://localhost:3001/api/profiles/parent-student-link/${parentId}/${studentId}`, {
+      const response = await fetch(`${API_BASE}/profile/parent-student-link/${parentId}/${studentId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {
@@ -168,7 +180,7 @@ export default function StudentDetailPage() {
         throw new Error(error.message || 'Failed to unlink parent');
       }
 
-      await fetchLinkedParents();
+      await fetchLinkedParents(student?.id);
     } catch (err: any) {
       alert(err.message);
     }
@@ -208,43 +220,43 @@ export default function StudentDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Back Button */}
       <Button 
         variant="outline" 
         onClick={() => router.back()}
-        className="gap-2"
+        className="gap-2 w-full sm:w-auto min-h-[44px] sm:min-h-0"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Students
       </Button>
 
       {/* Student Profile Card */}
-      <div className="bg-white border border-gray-200 rounded-md p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-md bg-gray-900 flex items-center justify-center text-white text-2xl font-semibold">
+      <div className="bg-white border border-gray-200 rounded-md p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
+          <div className="w-16 h-16 rounded-md bg-gray-900 flex items-center justify-center text-white text-2xl font-semibold shrink-0">
             {student.firstName[0]}{student.lastName[0]}
           </div>
-          <div className="flex-1">
-            <h1 className="text-2xl font-semibold text-gray-900">
+          <div className="flex-1 w-full">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
               {student.firstName} {student.lastName}
             </h1>
             <p className="text-gray-600 mt-1 text-sm">{student.enrollmentNumber}</p>
             
-            <div className="flex gap-6 mt-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Mail className="w-4 h-4" />
+            <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 sm:gap-6 mt-3 text-sm">
+              <div className="flex items-center gap-2 text-gray-600 break-all">
+                <Mail className="w-4 h-4 shrink-0" />
                 {student.user.email}
               </div>
               {student.phoneNumber && (
                 <div className="flex items-center gap-2 text-gray-600">
-                  <Phone className="w-4 h-4" />
+                  <Phone className="w-4 h-4 shrink-0" />
                   {student.phoneNumber}
                 </div>
               )}
             </div>
 
-            <div className="flex gap-2 mt-3">
+            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-3">
               <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded border border-gray-200">
                 {student.school}
               </span>
@@ -260,15 +272,15 @@ export default function StudentDetailPage() {
       </div>
 
       {/* Linked Parents Section */}
-      <div className="bg-white border border-gray-200 rounded-md p-6">
-        <div className="flex justify-between items-center mb-4">
+      <div className="bg-white border border-gray-200 rounded-md p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-gray-700" />
             <h2 className="text-lg font-semibold text-gray-900">Linked Parents</h2>
           </div>
           <Button 
             onClick={() => setShowLinkModal(true)}
-            className="bg-gray-900 hover:bg-gray-800 text-white"
+            className="bg-gray-900 hover:bg-gray-800 text-white w-full sm:w-auto min-h-[44px] sm:min-h-0"
             size="sm"
           >
             + Link Parent

@@ -1,4 +1,5 @@
 // client/lib/attendance.ts
+import { getToken } from './auth';
 const BASE_ATTENDANCE_URL =
   process.env.NEXT_PUBLIC_ATTENDANCE_SERVICE_URL || 'http://localhost:3004';
 
@@ -104,15 +105,11 @@ export class AttendanceError extends Error {
 }
 
 const getAuthHeaders = (): HeadersInit => {
-  try {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  } catch {
-    return { 'Content-Type': 'application/json' };
-  }
+  const token = getToken() || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 };
 
 const handleResponse = async <T>(response: Response): Promise<T> => {

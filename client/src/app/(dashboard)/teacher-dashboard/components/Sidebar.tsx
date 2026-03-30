@@ -1,82 +1,140 @@
-//client\src\app\(dashboard)\teacher-dashboard\components\Sidebar.tsx
+﻿//client\src\app\(dashboard)\teacher-dashboard\components\Sidebar.tsx
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { FiHome, FiCalendar, FiSettings, FiLogOut } from "react-icons/fi"
-import { MdOutlineTaskAlt } from "react-icons/md"
-import { FiMail } from "react-icons/fi"
+import { FiSettings, FiLogOut, FiX } from "react-icons/fi"
 import { FaGraduationCap } from "react-icons/fa6"
+import { TbSmartHome } from "react-icons/tb";
+import { RiQrScan2Line } from "react-icons/ri";
+import { GrTasks } from "react-icons/gr";
+import { SiProtonmail } from "react-icons/si";
 import { clearAuth } from "../../../../../lib/auth"
+import { cn } from "../../../../../lib/utils"
+import { Button } from "../../../../../components/ui/button"
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+  isExpanded?: boolean;
+}
+
+export default function Sidebar({ isOpen = false, onClose, isExpanded = true }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
 
   const items = [
-    { icon: FiHome, label: "Home", path: "/teacher-dashboard" },
-    { icon: MdOutlineTaskAlt, label: "Task", path: "/teacher-dashboard/task" },
-    { icon: FiCalendar, label: "Attendance", path: "/teacher-dashboard/attendance" },
-    { icon: FiMail, label: "Mail", path: "/teacher-dashboard/mail" },
-  ]
-
+    { icon: TbSmartHome, label: "Home", path: "/teacher-dashboard" },
+    { icon: GrTasks, label: "Task", path: "/teacher-dashboard/task" }, 
+    { icon: RiQrScan2Line, label: "Attendance", path: "/teacher-dashboard/attendance" },
+    { icon: SiProtonmail, label: "Mail", path: "/teacher-dashboard/mail" },  ]
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0">
-      <div className="h-16 flex items-center px-6 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-            <FaGraduationCap className="text-white text-sm" />
+    <aside
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 w-64 transition-all duration-300 ease-in-out md:translate-x-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden",
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        isExpanded ? "md:w-64" : "md:w-[80px]"
+      )}
+      aria-expanded={isOpen}
+    >
+      <div className={cn("h-16 flex items-center px-4 sm:px-6 border-b border-gray-200 pt-[max(0px,env(safe-area-inset-top))] transition-all duration-300", isExpanded ? "justify-between" : "justify-between md:justify-center")}>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-slate-900 rounded-lg flex shrink-0 items-center justify-center shadow-sm">
+            <FaGraduationCap className="text-white text-[15px]" />
           </div>
-          <span className="font-semibold text-base text-gray-900">TeacherHub</span>
+
+          <span className={cn("font-semibold text-base text-slate-900 whitespace-nowrap tracking-tight", !isExpanded && "md:hidden")}>
+            TeacherHub
+          </span>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden p-3 -mr-2"
+          onClick={onClose}
+          aria-label="Close Sidebar"
+        >
+          <FiX className="w-5 h-5" />
+        </Button>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-3">
+      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto w-full">
+        <div className={cn("text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-3 whitespace-nowrap", !isExpanded && "md:hidden")}>
           Main
         </div>
-        {items.map((it) => {
-          const Icon = it.icon
-          const active = pathname === it.path
+        
+        {items.map((item) => {
+          const Icon = item.icon
+          const isActive = pathname === item.path
+
           return (
             <button
-              key={it.path}
-              onClick={() => router.push(it.path)}
-              className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                ${active ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"}`}
+              key={item.path}
+              onClick={() => router.push(item.path)}
+              className="group w-full"
             >
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors
-                  ${active ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600"}`}
+              <div
+                className={`
+                flex items-center gap-3 py-2.5 rounded-lg text-[14px] font-medium
+                transition-all duration-200
+                ${isExpanded ? "px-3 justify-start" : "px-3 md:px-0 justify-start md:justify-center"}
+                ${isActive
+                    ? "bg-slate-50 border border-slate-200 shadow-sm text-slate-900"
+                    : "text-slate-500 border border-transparent hover:bg-slate-50 hover:text-slate-900"
+                  }
+                `}
+                title={!isExpanded ? item.label : undefined}
               >
-                <Icon className="text-base" />
-              </span>
-              <span>{it.label}</span>
+                <div
+                  className={`relative flex h-5 w-5 shrink-0 items-center justify-center transition-colors
+                    ${isActive
+                      ? "text-slate-900"
+                      : "text-slate-400 group-hover:text-slate-700"
+                    }
+                  `}
+                >
+                  <Icon className="text-lg transition-colors duration-200" />
+                </div>
+                <span className={cn("flex-1 text-left whitespace-nowrap tracking-wide", !isExpanded && "md:hidden")}>
+                  {item.label}
+                </span>
+              </div>
             </button>
           )
         })}
       </nav>
 
-      <div className="px-4 py-4 border-t border-gray-200 pb-8 flex flex-col gap-1">
-        <button className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-            <FiSettings className="text-base" />
+      <div className="px-4 py-4 mt-auto border-t border-slate-200 pb-[max(2rem,env(safe-area-inset-bottom))] flex flex-col gap-1">
+        <button
+          title={!isExpanded ? "Settings" : undefined}
+          className={cn(
+            "group w-full flex items-center gap-3 py-2.5 rounded-lg text-[14px] font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent transition-all",
+            isExpanded ? "px-3 justify-start" : "px-3 md:px-0 justify-start md:justify-center"
+          )}
+        >
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center transition-colors text-slate-400 group-hover:text-slate-700">
+            <FiSettings className="text-lg" />
           </span>
-          <span>Settings</span>
+          <span className={cn("whitespace-nowrap tracking-wide", !isExpanded && "md:hidden")}>Settings</span>
         </button>
 
-        <button 
+        <button
+          title={!isExpanded ? "Logout" : undefined}
           onClick={() => {
             clearAuth();
-            router.push('/login/teacher');
+            router.push("/login/teacher");
           }}
-          className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors duration-200"
+          className={cn(
+            "group w-full flex items-center gap-3 py-2.5 rounded-lg text-[14px] font-medium text-red-500 hover:text-red-700 hover:bg-red-50 border border-transparent transition-all duration-200",
+            isExpanded ? "px-3 justify-start" : "px-3 md:px-0 justify-start md:justify-center"
+          )}
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-red-50 text-red-500 group-hover:bg-red-100 transition-colors">
-            <FiLogOut className="text-base" />
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center transition-colors text-red-400 group-hover:text-red-600">
+            <FiLogOut className="text-lg" />
           </span>
-          <span>Logout</span>
+          <span className={cn("whitespace-nowrap tracking-wide", !isExpanded && "md:hidden")}>Logout</span>
         </button>
       </div>
     </aside>
   )
 }
+

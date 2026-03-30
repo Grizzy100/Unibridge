@@ -163,7 +163,58 @@ export async function getParentOutpassHistory(req: Request, res: Response) {
       where: whereClause,
       orderBy: { createdAt: 'desc' }
     });
-    res.json({ success: true, data: outpasses });
+
+    if (outpasses.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const outpassStudentIds = [...new Set(outpasses.map(o => o.studentId))];
+
+    const students = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        firstName: string;
+        lastName: string;
+        enrollmentNumber: string | null;
+        hostelAssigned: boolean;
+        hostelName: string | null;
+        email: string;
+      }>
+    >`
+      SELECT
+        sp.id,
+        sp."firstName",
+        sp."lastName",
+        sp."enrollmentNumber",
+        sp."hostelAssigned",
+        sp."hostelName",
+        u.email
+      FROM public."StudentProfile" sp
+      JOIN public."User" u ON u.id = sp."userId"
+      WHERE sp.id = ANY(${outpassStudentIds})
+    `;
+
+    const studentMap = new Map(
+      students.map(s => [
+        s.id,
+        {
+          firstName: s.firstName,
+          lastName: s.lastName,
+          name: `${s.firstName} ${s.lastName}`,
+          enrollmentNumber: s.enrollmentNumber,
+          hostelAssigned: s.hostelAssigned,
+          hostelName: s.hostelName,
+          email: s.email,
+        },
+      ])
+    );
+
+    const enriched = outpasses.map(o => ({
+      ...o,
+      student: studentMap.get(o.studentId) ?? null,
+    }));
+
+    res.json({ success: true, data: enriched });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

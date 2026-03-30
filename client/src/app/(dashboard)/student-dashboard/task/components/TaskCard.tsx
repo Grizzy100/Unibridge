@@ -316,83 +316,81 @@ export default function TaskCard({ task, courseCode, onSubmitClick, readOnly = f
   const canSubmit = !submission || submission.status === 'PENDING' || submission.status === 'RESUBMITTING';
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 p-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          {/* Course Badge */}
-          <div className="inline-flex items-center gap-2 mb-3">
-            <span className="inline-block px-3 py-1 bg-slate-900 text-white text-xs font-bold rounded-full uppercase tracking-wide">
+    <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 p-3 sm:p-4 md:p-5 mb-3">
+      <div className="flex flex-col">
+        {/* Top Header: Badges */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="inline-flex items-center gap-1.5">
+            <span className="inline-block px-2 py-0.5 bg-slate-900 text-white text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wide">
               {courseCode}
             </span>
             {/* ✅ FIXED: Only show "Urgent" for PENDING tasks that are urgent */}
             {isUrgent && status === 'PENDING' && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-red-100 text-red-700 text-[10px] sm:text-xs font-semibold rounded-full">
                 <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
                 Urgent
               </span>
             )}
           </div>
 
-          {/* Task Title */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
-            {task.title}
-          </h3>
-
-          {/* Description */}
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-            {task.description || 'No description provided'}
-          </p>
-
-          {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            {/* Deadline Timer */}
-            <div className={`flex items-center gap-2 ${
-              status === 'LATE' 
-                ? 'text-red-600 font-semibold' 
-                : isUrgent && status === 'PENDING'
-                ? 'text-red-600 font-semibold' 
-                : 'text-gray-600'
-            }`}>
-              <FiClock />
-              <span>{timeRemaining}</span>
-            </div>
-
-            {/* Max Marks */}
-            <div className="flex items-center gap-2 text-gray-600">
-              <FiFileText />
-              <span>{task.maxMarks} marks</span>
-            </div>
-
-            {/* Marks (if graded) */}
-            {submission?.marks !== undefined && submission?.marks !== null && (
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">Score:</span>
-                <span className="font-bold text-gray-900">
-                  {submission.marks}/{task.maxMarks}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Side Actions */}
-        <div className="flex flex-col items-end gap-3">
           {/* Status Badge */}
           {statusConfig && (
-            <div className={`flex items-center gap-2 px-3 py-1.5 ${statusConfig.bgColor} ${statusConfig.textColor} border ${statusConfig.borderColor} rounded-full text-sm font-medium`}>
-              <statusConfig.icon className="text-base" />
+            <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 ${statusConfig.bgColor} ${statusConfig.textColor} border ${statusConfig.borderColor} rounded-full text-[10px] sm:text-sm font-medium`}>
+              <statusConfig.icon className="text-xs sm:text-base" />
               <span>{statusConfig.label}</span>
             </div>
           )}
+        </div>
 
-          {/* Submit Button */}
+        {/* Title and Submit Button */}
+        <div className="flex flex-row items-center justify-between gap-3 mb-2">
+          <h3 className="text-sm sm:text-lg font-bold text-gray-900 line-clamp-1">
+            {task.title}
+          </h3>
+          
           {canSubmit && !readOnly && (
             <button
               onClick={onSubmitClick}
-              className="px-5 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors duration-200"
+              className="shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-900 text-white text-[11px] sm:text-sm font-medium rounded-md hover:bg-slate-800 transition-colors duration-200"
             >
               Add Submission
             </button>
+          )}
+        </div>
+
+        {/* Description */}
+        <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2">
+          {task.description || 'No description provided'}
+        </p>
+
+        {/* Meta Info */}
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm mt-auto">
+          {/* Deadline Timer */}
+          <div className={`flex items-center gap-1.5 ${
+            status === 'LATE' 
+              ? 'text-red-600 font-semibold' 
+              : isUrgent && status === 'PENDING'
+              ? 'text-red-600 font-semibold' 
+              : 'text-gray-600'
+          }`}>
+            <FiClock size={12} className="sm:w-4 sm:h-4" />
+            <span className="text-[10px] sm:text-sm">{timeRemaining}</span>
+          </div>
+
+          {/* Max Marks */}
+          <div className="flex items-center gap-1.5 text-gray-600">
+            <FiFileText size={12} className="sm:w-4 sm:h-4" />
+            <span className="text-[10px] sm:text-sm">{task.maxMarks} marks</span>
+          </div>
+
+          {/* Marks (if graded) */}
+          {submission?.marks !== undefined && submission?.marks !== null && (
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-sm">
+              <span className="text-gray-600">Score:</span>
+              <span className="font-bold text-gray-900">
+                {submission.marks}/{task.maxMarks}
+              </span>
+            </div>
           )}
         </div>
       </div>

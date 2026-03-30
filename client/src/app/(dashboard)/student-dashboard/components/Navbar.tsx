@@ -44,10 +44,17 @@
 // client/src/app/(dashboard)/student-dashboard/components/Navbar.tsx
 'use client';
 
-import { FiSearch, FiUser } from 'react-icons/fi';
+import { FiSearch, FiUser, FiMenu } from 'react-icons/fi';
+import { BiMenuAltLeft, BiMenuAltRight } from "react-icons/bi";
 import NotificationBell from './NotificationBell';
 
-export default function Navbar() {
+interface NavbarProps {
+  onMenuClick: () => void;
+  toggleSidebarExpand?: () => void;
+  isSidebarExpanded?: boolean;
+}
+
+export default function Navbar({ onMenuClick, toggleSidebarExpand, isSidebarExpanded = true }: NavbarProps) {
   return (
     <header
       className="
@@ -56,16 +63,36 @@ export default function Navbar() {
       backdrop-blur-xl
       border-b border-gray-200/60
       flex items-center justify-between
-      px-6
+      px-4 sm:px-6
       sticky top-0
       z-20
       "
     >
 
-      {/* Search */}
-      <div className="flex-1 max-w-xl">
+      {/* Mobile Hamburger & Search */}
+      <div className="flex-1 flex max-w-xl gap-2 sm:gap-4 items-center">
 
-        <div className="relative group">
+        {/* Mobile menu toggle */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100/50 hover:text-slate-900 rounded-lg transition-colors"
+          aria-label="Open Sidebar"
+        >
+          <FiMenu className="text-xl" />
+        </button>
+
+        {/* Desktop Expand/Collapse toggle */}
+        {toggleSidebarExpand && (
+          <button
+            onClick={toggleSidebarExpand}
+            className="hidden md:flex p-2 -ml-2 text-gray-500 hover:bg-gray-100/50 hover:text-slate-900 rounded-lg transition-colors"
+            aria-label="Toggle Sidebar"
+          >
+            {isSidebarExpanded ? <BiMenuAltLeft className="text-2xl" /> : <BiMenuAltRight className="text-2xl" />}
+          </button>
+        )}
+
+        <div className="relative group flex-1">
 
           <FiSearch
             className="

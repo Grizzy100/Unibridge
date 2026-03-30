@@ -7,6 +7,7 @@ import {
   FiArchive,
   FiCornerUpLeft,
   FiStar,
+  FiArrowLeft,
 } from "react-icons/fi"
 import type { Mail } from "./types"
 import { formatDateCompact } from "./utils"
@@ -17,6 +18,7 @@ interface MailViewerProps {
   onArchive: () => void
   onTrash: () => void
   onStar: () => void
+  onClose?: () => void
 }
 
 export default function MailViewer({
@@ -25,6 +27,7 @@ export default function MailViewer({
   onArchive,
   onTrash,
   onStar,
+  onClose,
 }: MailViewerProps) {
   if (!mail) {
     return (
@@ -56,22 +59,35 @@ export default function MailViewer({
       : "Unknown recipient"
 
   return (
-    <section className="bg-white flex flex-col min-w-0">
+    <section className="bg-white flex flex-col min-w-0 h-full overflow-hidden">
       {/* Top toolbar */}
-      <div className="h-12 px-4 border-b border-slate-200 flex items-center justify-between">
-        {mail.isMirrored && !mail.isDirectRecipient ? (
-          <div className="text-xs font-medium px-2 py-1 rounded-md bg-amber-100 text-amber-700">
-            View Only (Mirrored)
-          </div>
-        ) : (
-          <button
-            onClick={onReply}
-            className="h-9 px-3 rounded-xl hover:bg-slate-50 text-sm font-medium text-slate-700 flex items-center gap-2"
-          >
-            <FiCornerUpLeft />
-            Reply
-          </button>
-        )}
+      <div className="h-12 px-2 sm:px-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2">
+          {/* Mobile Back Button */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="lg:hidden h-9 w-9 rounded-xl hover:bg-slate-50 text-slate-700 flex items-center justify-center -ml-1 mr-1"
+              title="Back"
+            >
+              <FiArrowLeft className="text-xl" />
+            </button>
+          )}
+
+          {mail.isMirrored && !mail.isDirectRecipient ? (
+            <div className="text-xs font-medium px-2 py-1 rounded-md bg-amber-100 text-amber-700 hidden sm:block">
+              View Only (Mirrored)
+            </div>
+          ) : (
+            <button
+              onClick={onReply}
+              className="h-9 px-3 rounded-xl hover:bg-slate-50 text-sm font-medium text-slate-700 flex items-center gap-2"
+            >
+              <FiCornerUpLeft />
+              Reply
+            </button>
+          )}
+        </div>
 
         <div className="flex items-center gap-1">
           <button

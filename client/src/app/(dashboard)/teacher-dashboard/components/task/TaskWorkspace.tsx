@@ -519,6 +519,7 @@ export default function TaskWorkspace() {
   const [courseId, setCourseId] = useState("")
   const [tasks, setTasks] = useState<UiTask[]>([])
   const [selectedTaskId, setSelectedTaskId] = useState("")
+  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false)
 
   const [students, setStudents] = useState<CourseStudent[]>([])
   const [createOpen, setCreateOpen] = useState(false)
@@ -554,6 +555,7 @@ export default function TaskWorkspace() {
 
       // Reset state
       setSelectedTaskId("")
+      setMobileDetailsOpen(false)
       setTasks([])
       setStudents([])
       setSubmissionsByTask({})
@@ -820,7 +822,7 @@ export default function TaskWorkspace() {
           <button
             onClick={() => setCreateOpen(true)}
             disabled={!courseId}
-            className="h-10 px-4 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            className="h-9 sm:h-10 px-3 sm:px-4 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 text-xs sm:text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"  
           >
             Create Task
           </button>
@@ -844,6 +846,7 @@ export default function TaskWorkspace() {
                     selected={t.id === selectedTaskId}
                     onClick={() => {
                       setSelectedTaskId(t.id)
+                      setMobileDetailsOpen(true)
                       closeTooltipImmediate()
                     }}
                   />
@@ -852,10 +855,28 @@ export default function TaskWorkspace() {
             )}
           </div>
 
-          {/* Students List */}
-          <div className="space-y-4">
+          {/* Students List Desktop / Mobile Overlay */}
+          <div
+            className={`space-y-4 fixed inset-0 z-50 bg-slate-50 p-4 pb-24 overflow-y-auto lg:static lg:block lg:z-auto lg:bg-transparent lg:p-0 lg:pb-0 lg:overflow-visible ${
+              mobileDetailsOpen ? "block" : "hidden lg:block"
+            }`}
+          >
+            {/* Mobile Header */}
+            <div className="lg:hidden flex items-center justify-between mb-2">
+              <h2 className="text-xl font-bold text-slate-900">Task Details</h2>
+              <button
+                onClick={() => setMobileDetailsOpen(false)}
+                className="text-slate-500 hover:bg-slate-200 bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+                aria-label="Close details"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
             {!selectedTask ? (
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-600 shadow-sm">
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-600 shadow-sm hidden lg:block">
                 Select a task to view students.
               </div>
             ) : (

@@ -18,8 +18,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
@@ -32,12 +33,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       />
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="md:pl-[var(--sidebar-width-md)] lg:pl-[var(--sidebar-width-lg)] transition-all duration-300">
         {/* Navbar */}
         <Navbar onMenuClick={() => setSidebarOpen(true)} />
 
         {/* Page content */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="p-4 sm:p-6 lg:p-8 pb-[max(1rem,env(safe-area-inset-bottom))] max-w-7xl mx-auto w-full">
           {children}
         </main>
       </div>

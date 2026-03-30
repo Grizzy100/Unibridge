@@ -1,6 +1,6 @@
 //server\mail-service\src\utils\prisma.ts
 import 'dotenv/config';
-import { PrismaClient } from '../generated/prisma/client';
+import { PrismaClient } from '../generated/prisma/client.js';
 
 import { PrismaPg } from '@prisma/adapter-pg';
 import pkg from 'pg'

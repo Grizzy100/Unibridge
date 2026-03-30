@@ -2,7 +2,13 @@
 'use client';
 
 import { Course } from '../../../../../../lib/task';
-import { FiChevronDown } from 'react-icons/fi';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../../../components/ui/select";
 
 interface TaskFiltersProps {
   activeFilter: 'All' | 'Completed' | 'Pending' | 'Overdue';
@@ -27,15 +33,15 @@ export default function TaskFilters({
   ];
 
   return (
-    <div className="flex items-center justify-between flex-wrap gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+    <div className="flex flex-col gap-2 sm:gap-3 md:flex-row md:items-center md:justify-between bg-white p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
       {/* Status Filters */}
-      <div className="flex gap-2">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto max-w-full md:max-w-[70%]">
         {filters.map((filter) => (
           <button
             key={filter}
             onClick={() => onFilterChange(filter)}
             className={`
-              px-5 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200
+              shrink-0 px-3 sm:px-4 py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 whitespace-nowrap
               ${
                 activeFilter === filter
                   ? 'bg-slate-900 text-white shadow-md'
@@ -49,27 +55,26 @@ export default function TaskFilters({
       </div>
 
       
-      <div className="relative">
-        <select
-          value={selectedCourseId}
-          onChange={(e) => onCourseChange(e.target.value)}
-          className="
-            appearance-none px-5 py-2.5 pr-12 rounded-lg border border-gray-300 
-            text-sm font-medium text-gray-700 bg-white 
-            hover:border-gray-400 hover:shadow-sm
-            focus:outline-none focus:border-gray-400
-
-            transition-all duration-200 cursor-pointer
-          "
-        >
-          <option value="All">All Courses</option>
-          {courses.map((course) => (
-            <option key={course.id} value={course.id}>
-              {course.courseCode} - {course.courseName}
-            </option>
-          ))}
-        </select>
-        <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none transition-colors" />
+      <div className="relative w-full md:w-auto md:min-w-[220px]">
+        <Select value={selectedCourseId} onValueChange={onCourseChange}>
+          <SelectTrigger className="w-full bg-white border-gray-300 text-gray-700 hover:border-gray-400 focus:ring-slate-900 transition-all shadow-sm rounded-md sm:rounded-lg h-9 sm:h-10 text-xs sm:text-sm font-medium pr-3">
+            <SelectValue placeholder="All Courses" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-gray-200">
+            <SelectItem value="All" className="text-xs sm:text-sm font-medium cursor-pointer">
+              All Courses
+            </SelectItem>
+            {courses.map((course) => (
+              <SelectItem
+                key={course.id}
+                value={course.id}
+                className="text-xs sm:text-sm cursor-pointer"
+              >
+                {course.courseCode} - {course.courseName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

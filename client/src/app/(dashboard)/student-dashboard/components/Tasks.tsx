@@ -133,7 +133,7 @@ export default function Tasks() {
 
   // Success State - Show Tasks
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {tasks.map((task) => (
         <TaskCard
           key={task.id}

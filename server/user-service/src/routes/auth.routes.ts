@@ -9,6 +9,7 @@ const router = Router();
 
 // Public login
 router.post("/login", authCtrl.login);
+router.post("/admin/login", authCtrl.adminLogin);
 
 // Admin protected route to create accounts
 router.post("/admin/users", authenticate, authorize("ADMIN"), authCtrl.adminCreateUser);

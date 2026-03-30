@@ -40,12 +40,12 @@ export default function MailFolders({
   onCompose: () => void
 }) {
   return (
-    <aside className="bg-white border-r border-slate-200 flex flex-col">
-      {/* Compose button */}
-      <div className="p-3">
+    <aside className="bg-white border-r border-slate-200 flex flex-col h-full"> 
+      {/* Compose button - Hidden on mobile because it has a floating button */}
+      <div className="p-3 hidden lg:block">
         <button
           onClick={onCompose}
-          className="w-full h-9 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition flex items-center justify-center gap-2"
+          className="w-full h-9 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition flex items-center justify-center gap-2"  
         >
           <FiPlus />
           Compose
@@ -53,7 +53,7 @@ export default function MailFolders({
       </div>
 
       {/* Folders label */}
-      <div className="px-3 pb-2">
+      <div className="px-3 pb-2 pt-4 lg:pt-0">
         <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
           Folders
         </p>

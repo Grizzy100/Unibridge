@@ -25,12 +25,12 @@ export function StatCard({
 
   return (
     <Card className="hover:shadow-lg transition-shadow duration-300">
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
-            <div className="flex items-center gap-1.5">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900">{value}</p>
+            <div className="flex items-center gap-1.5 flex-wrap">
               {trend !== 'neutral' && (
                 <TrendIcon
                   className={`w-4 h-4 ${

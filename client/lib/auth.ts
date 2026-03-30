@@ -22,8 +22,18 @@ export interface LoginResponse {
   data: {
     token: string
     user: User
+    expiresIn?: number
   }
 }
+
+type RawLoginResponse =
+  | LoginResponse
+  | {
+      token: string
+      user: User
+      expiresIn?: number
+      redirectTo?: string
+    }
 
 // ============================================================================
 // STORAGE KEYS (Simple & Clean)
@@ -31,6 +41,18 @@ export interface LoginResponse {
 const TOKEN_KEY = "accessToken"
 const USER_KEY = "currentUser"
 const TOKEN_EXPIRY_KEY = "tokenExpiry"
+
+function normalizeLoginResponse(rawData: RawLoginResponse): LoginResponse["data"] {
+  const normalizedData = (rawData as LoginResponse)?.data
+    ? (rawData as LoginResponse).data
+    : (rawData as { token: string; user: User; expiresIn?: number })
+
+  if (!normalizedData?.token || !normalizedData?.user) {
+    throw new Error("Invalid response format")
+  }
+
+  return normalizedData
+}
 
 // ============================================================================
 // TOKEN MANAGEMENT
@@ -45,7 +67,9 @@ const TOKEN_EXPIRY_KEY = "tokenExpiry"
 export function setAuth(token: string, user: User, expiresIn: number = 86400) {
   if (typeof window === "undefined") return
 
-  const expiryTime = Date.now() + expiresIn * 1000
+  const decoded = decodeToken(token)
+  const tokenExpiry = typeof decoded?.exp === "number" ? decoded.exp * 1000 : null
+  const expiryTime = tokenExpiry ?? Date.now() + expiresIn * 1000
   
   localStorage.setItem(TOKEN_KEY, token)
   localStorage.setItem(USER_KEY, JSON.stringify(user))
@@ -179,17 +203,61 @@ export async function login(email: string, password: string): Promise<LoginRespo
       throw new Error(error.message || `HTTP ${response.status}`)
     }
 
-    const data: LoginResponse = await response.json()
+    const rawData: RawLoginResponse = await response.json()
+    const normalizedData = normalizeLoginResponse(rawData)
 
-    if (data.success && data.data) {
-      // Store token and user info
-      setAuth(data.data.token, data.data.user)
-      return data
+    // Store token and user info with backend-provided TTL when available.
+    setAuth(normalizedData.token, normalizedData.user, normalizedData.expiresIn)
+
+    return {
+      success: true,
+      data: {
+        token: normalizedData.token,
+        user: normalizedData.user,
+        expiresIn: normalizedData.expiresIn,
+      },
     }
-
-    throw new Error("Invalid response format")
   } catch (error) {
     console.error("[Auth] Login failed:", error)
+    throw error
+  }
+}
+
+/**
+ * Login admin user from dedicated admin endpoint.
+ */
+export async function adminLogin(email: string, password: string): Promise<LoginResponse> {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: "Login failed" }))
+      throw new Error(error.message || `HTTP ${response.status}`)
+    }
+
+    const rawData: RawLoginResponse = await response.json()
+    const normalizedData = normalizeLoginResponse(rawData)
+
+    if (normalizedData.user.role !== "ADMIN") {
+      throw new Error("Access denied. Admin credentials required.")
+    }
+
+    setAuth(normalizedData.token, normalizedData.user, normalizedData.expiresIn)
+
+    return {
+      success: true,
+      data: {
+        token: normalizedData.token,
+        user: normalizedData.user,
+        expiresIn: normalizedData.expiresIn,
+      },
+    }
+  } catch (error) {
+    console.error("[Auth] Admin login failed:", error)
     throw error
   }
 }

@@ -67,6 +67,8 @@ body {
 /* === Light Mode (Default) === */
 :root {
   --radius: 0.625rem;
+  --sidebar-width-md: 80px;
+  --sidebar-width-lg: 256px;
 
   /* Core palette */
   --background: oklch(1 0 0);

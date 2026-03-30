@@ -52,4 +52,12 @@ folder_codes.md
 
 *.tsbuildinfo
 
-chat-service
+# ===============================
+# Temporary / Debug scripts
+# ===============================
+server/**/tmp-*.ts
+server/**/debug-*.ts
+server/**/tmp-check-*.ts
+server/**/debug-check-*.ts
+server/**/src/scripts/test-*.ts
+

@@ -299,11 +299,11 @@ export default function SubmitTaskModal({ taskId, onClose, onSuccess }: SubmitTa
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white rounded-xl max-w-sm w-full shadow-2xl animate-slideUp" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-fadeIn">
+      <div className="bg-white rounded-lg sm:rounded-xl max-w-sm md:max-w-md w-full shadow-2xl animate-slideUp" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Submit Your Task</h2>
+            <h2 className="text-base sm:text-lg font-bold text-gray-900">Submit Your Task</h2>
             <p className="text-xs text-gray-500 mt-0.5">Upload your assignment file</p>
           </div>
           <button
@@ -315,7 +315,7 @@ export default function SubmitTaskModal({ taskId, onClose, onSuccess }: SubmitTa
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-2">
               Upload File *
@@ -327,7 +327,7 @@ export default function SubmitTaskModal({ taskId, onClose, onSuccess }: SubmitTa
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
                 className={`
-                  relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300
+                  relative border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-300
                   ${isDragging 
                     ? 'border-slate-900 bg-slate-50' 
                     : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
@@ -343,8 +343,8 @@ export default function SubmitTaskModal({ taskId, onClose, onSuccess }: SubmitTa
                   disabled={uploading}
                 />
                 <label htmlFor="file-upload" className="cursor-pointer">
-                  <div className="w-12 h-12 mx-auto mb-3 bg-slate-100 rounded-full flex items-center justify-center">
-                    <FiUpload className="text-2xl text-slate-600" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 bg-slate-100 rounded-full flex items-center justify-center">
+                    <FiUpload className="text-xl sm:text-2xl text-slate-600" />
                   </div>
                   <p className="text-sm text-gray-700 font-medium mb-1">
                     <span className="text-slate-900 font-semibold">Click to upload</span> or drag and drop
@@ -357,7 +357,7 @@ export default function SubmitTaskModal({ taskId, onClose, onSuccess }: SubmitTa
             ) : (
               <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                  <div className="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center shrink-0">
                     <FiFile className="text-white text-sm" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -393,7 +393,7 @@ export default function SubmitTaskModal({ taskId, onClose, onSuccess }: SubmitTa
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-              <FiX className="text-red-600 text-base flex-shrink-0 mt-0.5" />
+              <FiX className="text-red-600 text-base shrink-0 mt-0.5" />
               <p className="text-xs text-red-700">{error}</p>
             </div>
           )}

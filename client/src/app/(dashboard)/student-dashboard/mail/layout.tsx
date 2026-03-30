@@ -1,5 +1,7 @@
 //client\src\app\(dashboard)\student-dashboard\mail\layout.tsx
 // client/src/app/(dashboard)/student-dashboard/mail/layout.tsx
+'use client';
+
 import DashboardLayout from "../components/DashboardLayout"
 
 export default function StudentMailLayout({ 
@@ -9,7 +11,7 @@ export default function StudentMailLayout({
 }) {
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-128px)] min-h-[680px]">
+      <div className="h-[calc(100vh-128px)] min-h-[680px] w-full">
         {children}
       </div>
     </DashboardLayout>

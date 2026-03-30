@@ -200,24 +200,24 @@ export default function RoleLoginForm({
 
           <div
             className="
-              w-10 h-10
+              w-8 h-8 sm:w-10 sm:h-10
               bg-[#111827]
               rounded-[5px]
               flex items-center justify-center
             "
           >
-            <FaGraduationCap className="text-white text-[16px]" />
+            <FaGraduationCap className="text-white text-[14px] sm:text-[16px]" />
           </div>
 
         </div>
 
         <div>
 
-          <h1 className="text-[18px] font-semibold text-[#111827] tracking-[-0.01em]">
+          <h1 className="text-[16px] sm:text-[18px] font-semibold text-[#111827] tracking-[-0.01em]">
             Welcome to UniBridge
           </h1>
 
-          <p className="text-[13px] text-[#6b7280] mt-1">
+          <p className="text-[12px] sm:text-[13px] text-[#6b7280] mt-1">
             Select your role and sign in
           </p>
 
@@ -228,7 +228,7 @@ export default function RoleLoginForm({
 
       {/* Role selector */}
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
 
         {roles.map((role) => {
 
@@ -245,10 +245,10 @@ export default function RoleLoginForm({
               onClick={() => handleRoleChange(role.id)}
               disabled={loading}
               className={`
-                py-[9px]
+                py-2 sm:py-[9px]
                 border
                 rounded-[5px]
-                text-[13px]
+                text-[11px] sm:text-[13px]
                 font-medium
                 transition-colors
 
@@ -260,7 +260,7 @@ export default function RoleLoginForm({
               `}
             >
 
-              <Icon className="text-[15px] mx-auto mb-0.5" />
+              <Icon className="text-[14px] sm:text-[15px] mx-auto mb-0.5" />
 
               <span className="block">
                 {role.label}
@@ -295,11 +295,11 @@ export default function RoleLoginForm({
 
         <div>
 
-          <h2 className="text-[15px] font-semibold text-[#111827]">
+          <h2 className="text-[14px] sm:text-[15px] font-semibold text-[#111827]">
             Sign In
           </h2>
 
-          <p className="text-[13px] text-[#6b7280] mt-1">
+          <p className="text-[12px] sm:text-[13px] text-[#6b7280] mt-1">
             {currentRoleDescription}
           </p>
 
@@ -310,13 +310,13 @@ export default function RoleLoginForm({
 
         <div className="space-y-1">
 
-          <label className="text-[13px] font-medium text-[#374151]">
+          <label className="text-[12px] sm:text-[13px] font-medium text-[#374151]">
             Email Address
           </label>
 
           <div className="relative">
 
-            <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
+            <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af] text-[14px] sm:text-[16px]" />
 
             <input
               type="email"
@@ -332,8 +332,8 @@ export default function RoleLoginForm({
               placeholder="your.email@university.edu"
               className="
                 w-full
-                pl-9 pr-3 py-[10px]
-                text-[14px]
+                pl-8 sm:pl-9 pr-3 py-2 sm:py-[10px]
+                text-[13px] sm:text-[14px]
                 text-[#111827]
                 border border-[#d1d5db]
                 rounded-[5px]
@@ -352,13 +352,13 @@ export default function RoleLoginForm({
 
         <div className="space-y-1">
 
-          <label className="text-[13px] font-medium text-[#374151]">
+          <label className="text-[12px] sm:text-[13px] font-medium text-[#374151]">
             Password
           </label>
 
           <div className="relative">
 
-            <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
+            <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af] text-[14px] sm:text-[16px]" />
 
             <input
               type={showPassword ? "text" : "password"}
@@ -374,8 +374,8 @@ export default function RoleLoginForm({
               placeholder="Enter your password"
               className="
                 w-full
-                pl-9 pr-9 py-[10px]
-                text-[14px]
+                pl-8 sm:pl-9 pr-9 py-2 sm:py-[10px]
+                text-[13px] sm:text-[14px]
                 text-[#111827]
                 border border-[#d1d5db]
                 rounded-[5px]
@@ -395,8 +395,8 @@ export default function RoleLoginForm({
             >
 
               {showPassword
-                ? <FiEyeOff size={16} />
-                : <FiEye size={16} />}
+                ? <FiEyeOff className="text-[14px] sm:text-[16px]" />
+                : <FiEye className="text-[14px] sm:text-[16px]" />}
 
             </button>
 
@@ -407,7 +407,7 @@ export default function RoleLoginForm({
 
         {/* Remember */}
 
-        <div className="flex items-center justify-between text-[13px]">
+        <div className="flex items-center justify-between text-[12px] sm:text-[13px]">
 
           <label className="flex items-center gap-2 text-[#374151]">
 
@@ -421,7 +421,7 @@ export default function RoleLoginForm({
                   rememberMe: e.target.checked,
                 })
               }
-              className="w-4 h-4 border-[#d1d5db] rounded-[4px]"
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-[#d1d5db] rounded-[4px]"
             />
 
             Remember me
@@ -445,12 +445,12 @@ export default function RoleLoginForm({
           disabled={loading}
           className="
             w-full
-            py-[10px]
+            py-2 sm:py-[10px]
             bg-[#111827]
             text-white
             rounded-[5px]
             border border-[#111827]
-            text-[14px]
+            text-[13px] sm:text-[14px]
             font-medium
           "
         >
@@ -468,7 +468,7 @@ export default function RoleLoginForm({
         </button>
 
 
-        <p className="text-center text-[13px] text-[#6b7280]">
+        <p className="text-center text-[12px] sm:text-[13px] text-[#6b7280]">
           Don't have an account?{" "}
           <span className="text-[#111827] font-medium">
             Contact Admin
@@ -478,7 +478,7 @@ export default function RoleLoginForm({
       </form>
 
 
-      <p className="text-[11px] text-center text-[#9ca3af]">
+      <p className="text-[10px] sm:text-[11px] text-center text-[#9ca3af]">
         By signing in, you agree to UniBridge's Terms and Privacy Policy
       </p>
 

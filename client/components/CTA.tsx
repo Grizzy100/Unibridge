@@ -4,9 +4,9 @@ import React from "react";
 
 const CTACard: React.FC = () => {
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-[#e8e6ff] via-[#f5f4ff] to-white">
+    <section className="py-16 md:py-20 px-4 md:px-6 bg-gradient-to-br from-[#e8e6ff] via-[#f5f4ff] to-white">
       <div className="max-w-6xl mx-auto">
-        <div className="relative bg-gradient-to-br from-[#2d1b69] via-[#4a2f8f] to-[#5b3aa0] rounded-3xl overflow-hidden shadow-2xl p-12 md:p-16">
+        <div className="relative bg-gradient-to-br from-[#2d1b69] via-[#4a2f8f] to-[#5b3aa0] rounded-3xl overflow-hidden shadow-2xl p-6 sm:p-12 md:p-16">
           {/* Decorative 3D Shapes */}
           <div className="absolute top-10 left-10 w-32 h-32 opacity-20">
             <div className="relative w-full h-full">
@@ -38,17 +38,17 @@ const CTACard: React.FC = () => {
 
           {/* Content */}
           <div className="relative z-10 text-center max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-xl sm:text-3xl md:text-5xl font-bold text-white mb-3 sm:mb-4">
               Transform Your Campus Experience
             </h2>
-            <p className="text-lg text-white/90 mb-8">
+            <p className="text-sm sm:text-lg text-white/90 mb-6 sm:mb-8 px-2 sm:px-0">
               Manage students, staff, and operations — all from one unified dashboard.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <button className="bg-[#c4ff61] text-gray-900 px-8 py-4 rounded-lg hover:bg-[#b8f054] transition-all hover:shadow-lg font-semibold text-lg">
+            <div className="flex flex-row items-center justify-center space-x-2 sm:space-x-4">
+              <button className="w-auto bg-[#c4ff61] text-gray-900 px-4 sm:px-8 py-2.5 sm:py-4 rounded-lg hover:bg-[#b8f054] transition-all hover:shadow-lg font-semibold text-sm sm:text-lg whitespace-nowrap">      
                 Get Started Free
               </button>
-              <button className="text-white px-8 py-4 rounded-lg hover:bg-white/10 transition-all font-semibold text-lg border-2 border-white/20">
+              <button className="w-auto text-white px-4 sm:px-8 py-2.5 sm:py-4 rounded-lg hover:bg-white/10 transition-all font-semibold text-sm sm:text-lg border-2 border-white/20 whitespace-nowrap">
                 Book a Demo
               </button>
             </div>

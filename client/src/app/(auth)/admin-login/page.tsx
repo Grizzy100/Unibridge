@@ -7,7 +7,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Input } from "../../../../components/ui/input";
 import { Button } from "../../../../components/ui/button";
-import { login } from "../../../../lib/auth";
+import { adminLogin } from "../../../../lib/auth";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -24,17 +24,8 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const response = await login(email, password);
-      
-      // Check if user is admin
-      if (response.data.user.role !== "ADMIN") {
-        setError("Access denied. Admin credentials required.");
-        setLoading(false);
-        return;
-      }
-      
-      // ✅ Redirect to /admin (not /admin/dashboard)
-      router.push("/admin");
+      await adminLogin(email, password);
+      router.replace("/admin");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
@@ -53,7 +44,7 @@ export default function AdminLoginPage() {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
 
       {/* Glassmorphic Login Card */}
-      <div className="relative z-10 w-full max-w-[17rem] bg-white/10 backdrop-blur-2xl p-6 rounded-2xl border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.2)]">
+      <div className="relative z-10 w-[92%] sm:w-full max-w-[17rem] bg-white/10 backdrop-blur-2xl p-5 sm:p-6 rounded-2xl border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.2)]">
         {/* Back Button */}
         <button
           onClick={() => router.push("/")}

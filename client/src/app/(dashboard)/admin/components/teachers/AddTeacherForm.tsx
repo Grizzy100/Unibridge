@@ -69,7 +69,7 @@ export function AddTeacherForm({ onClose, onSuccess }: AddTeacherFormProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Add New Teacher</h2>
           <button
             onClick={onClose}
@@ -80,7 +80,7 @@ export function AddTeacherForm({ onClose, onSuccess }: AddTeacherFormProps) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
           {error && (
             <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
               {error}
@@ -91,7 +91,7 @@ export function AddTeacherForm({ onClose, onSuccess }: AddTeacherFormProps) {
             {/* Account */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Account Details</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">Email *</Label>
                   <Input
@@ -117,7 +117,7 @@ export function AddTeacherForm({ onClose, onSuccess }: AddTeacherFormProps) {
             {/* Personal */}
             <div className="border-t pt-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Personal Information</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">First Name *</Label>
                   <Input
@@ -204,7 +204,7 @@ export function AddTeacherForm({ onClose, onSuccess }: AddTeacherFormProps) {
             {/* Professional */}
             <div className="border-t pt-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Professional Information</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">Employee ID *</Label>
                   <Input
@@ -257,7 +257,7 @@ export function AddTeacherForm({ onClose, onSuccess }: AddTeacherFormProps) {
                 Address (Optional)
               </summary>
               <div className="mt-3 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-xs text-gray-600 mb-1.5 block">Address</Label>
                     <Input
@@ -297,7 +297,7 @@ export function AddTeacherForm({ onClose, onSuccess }: AddTeacherFormProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
+        <div className="flex justify-end gap-3 px-4 sm:px-6 py-4 border-t bg-gray-50">
           <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancel
           </Button>

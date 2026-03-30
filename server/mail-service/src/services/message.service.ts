@@ -195,6 +195,9 @@ class MessageService {
       const parentMapping = new Map<string, string>() // parentId -> studentId
       if (!dto.isConfidential) {
         const studentIds = new Set([...toUserIds, ...ccUserIds, ...bccUserIds])
+        if (senderInfo.role === 'STUDENT') {
+          studentIds.add(dto.senderId)
+        }
         const parentPromises = Array.from(studentIds).map(async id => {
           try {
             const pIds = await userServiceClient.getParentsByStudentId(id)

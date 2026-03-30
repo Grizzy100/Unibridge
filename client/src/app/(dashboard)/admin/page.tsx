@@ -60,14 +60,14 @@ export default function DashboardPage() {
     <div className="space-y-6">
       
       {/* Top Section */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Welcome back, Admin</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Welcome back, Admin</h2>
           <p className="text-sm text-muted-foreground mt-1">
             Here's what's happening with your institution today
           </p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 min-h-[44px] sm:min-h-0">
           Generate Report
         </Button>
       </div>

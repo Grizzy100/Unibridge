@@ -23,14 +23,14 @@ export function FeeCollectionChart() {
   return (
     <Card className="hover:shadow-lg transition-shadow duration-300">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <CardTitle>Fee Collection Overview</CardTitle>
             <CardDescription>
               Comparison of collected and pending fees
             </CardDescription>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
               <span className="text-sm text-muted-foreground">Collected</span>
@@ -43,49 +43,54 @@ export function FeeCollectionChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={feeCollectionData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis
-              dataKey="month"
-              stroke="#9ca3af"
-              fontSize={12}
-              tickLine={false}
-            />
-            <YAxis
-              stroke="#9ca3af"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => `₹${value / 1000}k`}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-              }}
-              formatter={(value: number) => `₹${value.toLocaleString()}`}
-            />
-            <Line
-              type="monotone"
-              dataKey="collected"
-              stroke="#10b981"
-              strokeWidth={3}
-              dot={{ fill: '#10b981', r: 5 }}
-              activeDot={{ r: 7 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="pending"
-              stroke="#f43f5e"
-              strokeWidth={3}
-              dot={{ fill: '#f43f5e', r: 5 }}
-              activeDot={{ r: 7 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="h-[250px] sm:h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={feeCollectionData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+              <XAxis
+                dataKey="month"
+                stroke="#9ca3af"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                padding={{ left: 10, right: 10 }}
+              />
+              <YAxis
+                stroke="#9ca3af"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                width={50}
+                tickFormatter={(value) => `₹${value / 1000}k`}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                }}
+                formatter={(value: number) => `₹${value.toLocaleString()}`}
+              />
+              <Line
+                type="monotone"
+                dataKey="collected"
+                stroke="#10b981"
+                strokeWidth={3}
+                dot={{ fill: '#10b981', r: 5 }}
+                activeDot={{ r: 7 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="pending"
+                stroke="#f43f5e"
+                strokeWidth={3}
+                dot={{ fill: '#f43f5e', r: 5 }}
+                activeDot={{ r: 7 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

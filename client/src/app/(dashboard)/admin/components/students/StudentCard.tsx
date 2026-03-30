@@ -46,12 +46,12 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:bg-gray-50 transition">
-      <div className="flex justify-between items-start">
+    <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm hover:bg-gray-50 transition">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         
         {/* Student Info */}
-        <div className="space-y-1 flex-1">
-          <div className="flex items-center gap-2">
+        <div className="space-y-2 flex-1 w-full">
+          <div className="flex flex-wrap items-center gap-2">
             <p className="font-medium text-[15px] text-gray-900">
               {student.firstName} {student.lastName}
             </p>
@@ -60,27 +60,31 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
             </Badge>
           </div>
           
-          <p className="text-sm text-gray-600">{student.enrollmentNumber}</p>
-          <p className="text-xs text-gray-500">{student.user.email}</p>
-          <p className="text-xs text-gray-500">
+          <div className="space-y-1">
+            <p className="text-sm text-gray-600 font-medium">{student.enrollmentNumber}</p>
+            <p className="text-xs text-gray-500 break-all">{student.user.email}</p>
+          </div>
+
+          <p className="text-xs text-gray-500 bg-gray-50 inline-block px-2 py-1 rounded">
             Batch: {student.batch} • Year {student.year} • Sem {student.semester}
           </p>
           
           {(student.fatherName || student.motherName) && (
-            <p className="text-xs text-gray-500">
-              Parent: {student.fatherName || student.motherName}
+            <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-2">
+              <span className="font-medium">Parent:</span> {student.fatherName || student.motherName}
               {student.parentContact && ` (${student.parentContact})`}
             </p>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-2">
+        {/* Actions - wrap or full width on tiny screens */}
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end">
           {!showConfirm ? (
             <>
               <Button 
                 size="sm" 
                 variant="outline"
+                className="flex-1 sm:flex-none min-w-[44px] min-h-[44px] sm:min-h-0"
                 onClick={() => window.location.href = `/admin/students/${student.userId}`}
               >
                 View
@@ -88,6 +92,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
               <Button 
                 size="sm" 
                 variant="outline"
+                className="flex-1 sm:flex-none min-w-[44px] min-h-[44px] sm:min-h-0"
                 onClick={() => setShowConfirm(true)}
               >
                 Edit
@@ -95,6 +100,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
               <Button 
                 size="sm" 
                 variant="destructive"
+                className="flex-1 sm:flex-none min-w-[44px] min-h-[44px] sm:min-h-0"
                 onClick={() => setShowConfirm(true)}
               >
                 Remove
@@ -105,6 +111,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
               <Button 
                 size="sm" 
                 variant="outline"
+                className="flex-1 sm:flex-none min-w-[44px] min-h-[44px] sm:min-h-0"
                 onClick={() => setShowConfirm(false)}
                 disabled={deleting}
               >
@@ -113,10 +120,11 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
               <Button 
                 size="sm" 
                 variant="destructive"
+                className="flex-1 sm:flex-none min-w-[44px] min-h-[44px] sm:min-h-0"
                 onClick={handleDelete}
                 disabled={deleting}
               >
-                {deleting ? 'Deleting...' : 'Confirm Delete'}
+                {deleting ? 'Deleting...' : 'Confirm'}
               </Button>
             </>
           )}

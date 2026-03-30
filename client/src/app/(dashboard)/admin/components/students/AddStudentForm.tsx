@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { Eye, EyeOff, X } from 'lucide-react';
 import { Button } from '../../../../../../components/ui/button';
 import { Input } from '../../../../../../components/ui/input';
 import { Label } from '../../../../../../components/ui/label';
@@ -23,6 +23,7 @@ interface AddStudentFormProps {
 export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -79,7 +80,7 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
       <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col shadow-xl">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Add New Student</h2>
           <button
             onClick={onClose}
@@ -90,7 +91,7 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
           
           {error && (
             <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
@@ -100,10 +101,11 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             
+            
             {/* Account Details */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Account Details</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">Email *</Label>
                   <Input
@@ -115,20 +117,31 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
                 </div>
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">Password *</Label>
-                  <Input
-                    type="password"
-                    placeholder="Min 8 characters"
-                    value={formData.password}
-                    onChange={(e) => handleChange('password', e.target.value)}
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Min 8 characters"
+                      value={formData.password}
+                      onChange={(e) => handleChange('password', e.target.value)}
+                      className="pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="border-t pt-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Personal Information</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">First Name *</Label>
                   <Input
@@ -200,11 +213,11 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
 
             <div className="border-t pt-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Academic Information</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">Enrollment Number *</Label>
                   <Input
-                    placeholder="Enrollment Number"
+                    placeholder="e.g. E23CSEU1234"
                     value={formData.enrollmentNumber}
                     onChange={(e) => handleChange('enrollmentNumber', e.target.value)}
                     required
@@ -275,7 +288,7 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
 
             <div className="border-t pt-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Parent/Guardian Information</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-xs text-gray-600 mb-1.5 block">Father's Name</Label>
                   <Input
@@ -325,7 +338,7 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
                 Address Information (Optional)
               </summary>
               <div className="mt-3 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <Label className="text-xs text-gray-600 mb-1.5 block">Current Address</Label>
                     <Input
@@ -397,7 +410,7 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
                 </button>
               </div>
               {formData.hostelAssigned && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-xs text-gray-600 mb-1.5 block">Hostel Block / Name *</Label>
                     <Input
@@ -422,7 +435,7 @@ export function AddStudentForm({ onClose, onSuccess }: AddStudentFormProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
+        <div className="flex justify-end gap-3 px-4 sm:px-6 py-4 border-t bg-gray-50">
           <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancel
           </Button>

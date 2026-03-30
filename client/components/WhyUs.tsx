@@ -42,22 +42,22 @@ const STARS: [number, number, number, number, number][] = [
 ];
 
 /* ─── pill data ──────────────────────────────────────────────────────────
-   cx/cy are in the 800x680 SVG coordinate space.
+   cx/cy are in the 1100x680 SVG coordinate space.
    side: which side of the node the pill floats toward.
    ────────────────────────────────────────────────────────────────────── */
 const OUTER_PILLS = [
-  { key: "notifications", text: "Smart Notifications",  icon: FaBell,             cx: 193, cy: 195, side: "left"  as const },
-  { key: "attendance",    text: "Attendance Insights",  icon: FaChartLine,        cx: 100, cy: 340, side: "left"  as const },
-  { key: "mail",          text: "Mail Regulation",      icon: FaEnvelopeOpenText, cx: 193, cy: 485, side: "left"  as const },
-  { key: "warden",        text: "Warden Automation",    icon: FaUserShield,       cx: 607, cy: 485, side: "right" as const },
-  { key: "tasks",         text: "Task Stacking",        icon: FaTasks,            cx: 700, cy: 340, side: "right" as const },
-  { key: "flow",          text: "Faster Daily Flow",    icon: FaBolt,             cx: 607, cy: 195, side: "right" as const },
+  { key: "notifications", text: "Smart Notifications",  icon: FaBell,             cx: 343, cy: 195, side: "left"  as const },
+  { key: "attendance",    text: "Attendance Insights",  icon: FaChartLine,        cx: 250, cy: 340, side: "left"  as const },
+  { key: "mail",          text: "Mail Regulation",      icon: FaEnvelopeOpenText, cx: 343, cy: 485, side: "left"  as const },
+  { key: "warden",        text: "Warden Automation",    icon: FaUserShield,       cx: 757, cy: 485, side: "right" as const },
+  { key: "tasks",         text: "Task Stacking",        icon: FaTasks,            cx: 850, cy: 340, side: "right" as const },
+  { key: "flow",          text: "Faster Daily Flow",    icon: FaBolt,             cx: 757, cy: 195, side: "right" as const },
 ];
 
 // Inner nodes moved off the horizontal centre line to avoid overlapping outer pills
 const INNER_PILLS = [
-  { key: "parent", text: "Parent Automation", icon: FaUserFriends, cx: 235, cy: 405, side: "left"  as const },
-  { key: "speed",  text: "Real-time Updates", icon: FaBolt,        cx: 565, cy: 275, side: "right" as const },
+  { key: "parent", text: "Parent Automation", icon: FaUserFriends, cx: 385, cy: 405, side: "left"  as const },
+  { key: "speed",  text: "Real-time Updates", icon: FaBolt,        cx: 715, cy: 275, side: "right" as const },
 ];
 
 const ALL_PILLS = [...OUTER_PILLS, ...INNER_PILLS];
@@ -66,7 +66,7 @@ const ALL_PILLS = [...OUTER_PILLS, ...INNER_PILLS];
 export default function WhyUs() {
   return (
     // No overflow-hidden on the section so pills can extend past the SVG box edges
-    <section className="relative py-24 px-6 bg-[#05070B]">
+    <section id="why-us" className="relative py-12 sm:py-16 md:py-24 px-4 md:px-6 bg-[#05070B] overflow-hidden">
 
       {/* ── starfield (clipped to section bounds) ── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -93,13 +93,13 @@ export default function WhyUs() {
 
         {/* ── heading ── */}
         <div className="mx-auto mb-2 max-w-3xl text-center">
-          <h2 className="text-[32px] md:text-[44px] font-semibold tracking-[-0.02em] text-white leading-tight">
+          <h2 className="text-[20px] sm:text-[32px] md:text-[44px] font-semibold tracking-[-0.02em] text-white leading-tight">
             Why{" "}
             <span className="bg-linear-to-r from-[#a78bfa] via-[#736bff] to-[#6366f1] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(115,107,255,0.7)]">
               UniBridge
             </span>
           </h2>
-          <p className="mt-5 text-[15px] md:text-[16px] leading-[1.7] text-[#B9C2CF] max-w-[680px] mx-auto">
+          <p className="mt-3 sm:mt-5 text-[12px] sm:text-[15px] md:text-[16px] leading-[1.6] sm:leading-[1.7] text-[#B9C2CF] max-w-[680px] mx-auto px-2">
             With UniBridge, discover innovative ways to streamline campus operations for everyone
             — students, wardens, and parents alike. Build seamless automation strategies across the
             institution, improving productivity with enhanced workflow solutions. This scalable
@@ -109,16 +109,16 @@ export default function WhyUs() {
 
         {/* ── arc diagram ── */}
         {/*
-          The outer div is 800px wide at most, centred. Pills may extend outside it but
-          the section (max-w-6xl = 1152px) has enough room on both sides to show them.
+          The outer div is 1100px wide at most, centred. Pills will now stay completely inside the 
+          container because we expanded the SVG viewBox by 150px on each side.
         */}
         <div
-          className="relative mx-auto mt-6"
-          style={{ maxWidth: 800, height: 680 }}
+          className="relative mx-auto mt-6 sm:mt-10 w-full"
+          style={{ maxWidth: 1100, aspectRatio: "1100 / 680" }}
         >
           {/* ────── SVG arcs + nodes ────── */}
           <svg
-            viewBox="0 0 800 680"
+            viewBox="0 0 1100 680"
             className="absolute inset-0 w-full h-full"
             style={{ overflow: "visible" }}
             aria-hidden="true"
@@ -153,33 +153,33 @@ export default function WhyUs() {
             </defs>
 
             {/* outer circle top arc */}
-            <path d="M 100 340 A 300 300 0 0 1 700 340"
+            <path d="M 250 340 A 300 300 0 0 1 850 340"
               fill="none" stroke="url(#wuArcGrad)" strokeWidth="1.6"
               filter="url(#wuGlow)" opacity="0.9" />
             {/* outer circle bottom arc */}
-            <path d="M 700 340 A 300 300 0 0 1 100 340"
+            <path d="M 850 340 A 300 300 0 0 1 250 340"
               fill="none" stroke="url(#wuArcGrad)" strokeWidth="1.6"
               filter="url(#wuGlow)" opacity="0.45" />
 
             {/* inner circle top arc */}
-            <path d="M 220 340 A 180 180 0 0 1 580 340"
+            <path d="M 370 340 A 180 180 0 0 1 730 340"
               fill="none" stroke="url(#wuArcGrad)" strokeWidth="1.2"
               filter="url(#wuGlow)" opacity="0.7" />
             {/* inner circle bottom arc */}
-            <path d="M 580 340 A 180 180 0 0 1 220 340"
+            <path d="M 730 340 A 180 180 0 0 1 370 340"
               fill="none" stroke="url(#wuArcGrad)" strokeWidth="1.2"
               filter="url(#wuGlow)" opacity="0.32" />
 
             {/* centre hub */}
-            <circle cx="400" cy="340" r="42" fill="#736bff" opacity="0.04" />
-            <circle cx="400" cy="340" r="26" fill="#736bff" opacity="0.07" />
-            <circle cx="400" cy="340" r="9"  fill="#736bff" filter="url(#wuNodeGlow)" opacity="0.95" />
+            <circle cx="550" cy="340" r="42" fill="#736bff" opacity="0.04" />
+            <circle cx="550" cy="340" r="26" fill="#736bff" opacity="0.07" />
+            <circle cx="550" cy="340" r="9"  fill="#736bff" filter="url(#wuNodeGlow)" opacity="0.95" />
 
             {/* dashed connector lines from hub to every node */}
             {ALL_PILLS.map((p) => (
               <line
                 key={`line-${p.key}`}
-                x1="400" y1="340" x2={p.cx} y2={p.cy}
+                x1="550" y1="340" x2={p.cx} y2={p.cy}
                 stroke="#736bff" strokeWidth="0.55"
                 strokeDasharray="4 5" opacity="0.22"
               />
@@ -211,25 +211,26 @@ export default function WhyUs() {
           {/* ────── floating pill badges ────── */}
           {ALL_PILLS.map((p, i) => {
             const isLeft  = p.side === "left";
-            const leftPct = (p.cx / 800) * 100;
+            const leftPct = (p.cx / 1100) * 100;
             const topPct  = (p.cy / 680) * 100;
             return (
               <div
                 key={p.key}
-                className="absolute"
+                className={`absolute w-max ${isLeft ? 'origin-right' : 'origin-left'} scale-[0.6] sm:scale-75 md:scale-100`}
                 style={{
                   left:            isLeft ? undefined : `${leftPct}%`,
                   right:           isLeft ? `${100 - leftPct}%` : undefined,
                   top:             `${topPct}%`,
                   transform:       "translateY(-50%)",
-                  // horizontal nudge away from node
-                  marginLeft:      isLeft ? undefined : "22px",
-                  marginRight:     isLeft ? "22px"    : undefined,
-                  animation:       `wuFloat ${4.5 + i * 0.3}s ease-in-out ${i * 0.35}s infinite`,
                   zIndex:          10,
                 }}
               >
-                <PillBadge icon={p.icon} text={p.text} small={i >= OUTER_PILLS.length} />
+                <div 
+                  className={`flex ${isLeft ? 'justify-end mr-[8px] sm:mr-[22px]' : 'justify-start ml-[8px] sm:ml-[22px]'}`}
+                  style={{ animation: `wuFloat ${4.5 + i * 0.3}s ease-in-out ${i * 0.35}s infinite` }}
+                >
+                  <PillBadge icon={p.icon} text={p.text} small={i >= OUTER_PILLS.length} />
+                </div>
               </div>
             );
           })}
@@ -275,7 +276,7 @@ function PillBadge({
         transition-all duration-300
         hover:border-[#736bff]/75
         hover:shadow-[0_0_28px_rgba(115,107,255,0.45)]
-        ${small ? "px-4 py-2 text-[12px]" : "px-5 py-2.5 text-[13px]"}
+        ${small ? "px-2.5 sm:px-4 py-1.5 sm:py-2 text-[9px] sm:text-[12px]" : "px-3 sm:px-5 py-2 sm:py-2.5 text-[10px] sm:text-[13px]"}
       `}
     >
       <Icon className="text-[#a78bfa] shrink-0" size={small ? 11 : 13} />

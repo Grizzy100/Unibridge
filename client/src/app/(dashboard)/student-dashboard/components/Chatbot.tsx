@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FaGraduationCap } from "react-icons/fa6";
 import { X, Send, Loader2 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { chatAPI } from "../../../../../lib/chatApi";
 
 type Message = { role: "bot" | "user"; content: string };
@@ -74,6 +75,7 @@ function renderMarkdown(text: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Chatbot() {
+    const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         { role: "bot", content: "Hello! I am your AI assistant. I can help you with campus rules, outpass policies, your academic schedule, and navigating the university. How can I help you today?" }
@@ -88,6 +90,10 @@ export default function Chatbot() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isOpen]);
 
+    // Do not render the chatbot on the mail page on mobile (or generally just hide it to make room for compose)
+    if (pathname.includes('/student-dashboard/mail')) {
+        return null;
+    }
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
         const userMsg = input.trim();

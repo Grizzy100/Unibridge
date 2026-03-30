@@ -35,19 +35,14 @@ export default function Hero() {
         {/* HEADLINE */}
         <h1 className="
           font-sans
-
-          text-[34px]
+          text-[32px]
           sm:text-[42px]
           md:text-[48px]
-
           font-semibold
-
           text-gray-900
-
           leading-[1.1]
-
           tracking-[-0.02em]
-          mt-10
+          mt-6 sm:mt-10
           mb-4
         ">
 
@@ -68,19 +63,14 @@ export default function Hero() {
         {/* DESCRIPTION */}
         <p className="
           font-sans
-
-          text-[15px]
-
+          text-[14px] sm:text-[15px]
           text-gray-600
-
           leading-[1.6]
-
           tracking-[-0.005em]
-
-          mb-7
-
+          mb-6 sm:mb-7
           max-w-lg
           mx-auto
+          px-2 sm:px-0
         ">
           UniBridge connects people, processes, and progress —
           enabling institutions to operate with clarity and efficiency.
@@ -88,7 +78,7 @@ export default function Hero() {
 
 
         {/* BUTTONS */}
-        <div className="flex items-center justify-center gap-1 mb-9">
+        <div className="flex items-center justify-center gap-2 sm:gap-4 mb-8 sm:mb-9">
 
           {/* Primary */}
           <button className="

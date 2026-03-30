@@ -3,7 +3,7 @@
 
 import { useMemo, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { FiPaperclip, FiSend, FiX, FiAlertCircle } from "react-icons/fi"
+import { FiPaperclip, FiSend, FiX, FiAlertCircle, FiArrowLeft } from "react-icons/fi"
 import type { MessageType, Mail } from "./types"
 import { MESSAGE_TYPE_LABEL } from "./types"
 import {
@@ -233,14 +233,25 @@ export default function ComposePanel({
 
   return (
     <section className="bg-white flex flex-col min-w-0 h-full overflow-hidden">
-      <div className="h-12 px-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-        <div className="text-sm font-semibold text-slate-900">
-          {isReply ? "Reply to message" : "New message"}
+      <div className="h-12 px-2 sm:px-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2">
+          {/* Mobile Back Button */}
+          <button
+            onClick={onClose}
+            disabled={sending}
+            className="lg:hidden h-9 w-9 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-600 disabled:opacity-60 -ml-1 mr-1"
+            title="Back"
+          >
+            <FiArrowLeft className="text-xl" />
+          </button>
+          <div className="text-sm font-semibold text-slate-900">
+            {isReply ? "Reply to message" : "New message"}
+          </div>
         </div>
         <button
           onClick={onClose}
           disabled={sending}
-          className="h-9 w-9 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-600 disabled:opacity-60"
+          className="hidden lg:flex h-9 w-9 rounded-xl hover:bg-slate-50 items-center justify-center text-slate-600 disabled:opacity-60"
           title="Close"
         >
           <FiX />
