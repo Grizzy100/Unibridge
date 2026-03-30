@@ -49,8 +49,8 @@ The friction wasn't the tools — it was the **gaps between them**. Unibridge wa
         ┌──────────┬───────────┼───────────┬───────────┬──────────────┐
         │          │           │           │           │              │
   ┌─────▼────┐ ┌───▼──────┐ ┌─▼────────┐ ┌▼─────────┐ ┌▼─────────┐ ┌▼──────────┐
-  │  user-   │ │attend-   │ │ outpass- │ │assign-   │ │  mail-   │ │  chat-    │
-  │ service  │ │ance-svc  │ │ service  │ │ment-svc  │ │ service  │ │ service   │
+  │  user-   │ │attend-   │ │ outpass- │ │  task-   │ │  mail-   │ │  chat-    │
+  │ service  │ │ance-svc  │ │ service  │ │ service  │ │ service  │ │ service   │
   │          │ │          │ │          │ │          │ │          │ │           │
   │Students  │ │QR gen    │ │Approval  │ │Deadlines │ │Categor-  │ │RAG + LLM  │
   │Faculty   │ │30s cycle │ │workflow  │ │Submiss-  │ │ized      │ │Hybrid     │
