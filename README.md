@@ -1,3 +1,6 @@
+Here's the complete README in raw markdown, ready to paste directly into your `README.md`:
+
+```markdown
 <div align="center">
 
 ### 🎓
@@ -42,33 +45,36 @@ The friction wasn't the tools — it was the **gaps between them**. Unibridge wa
 ## 🏗️ System Architecture
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                        Next.js Client                           │
-│              (App Router · React · Tailwind CSS)                │
-└────────────────────┬───────────────────────────────────────────┘
-                     │  REST
-        ┌────────────┼─────────────┬──────────────┬──────────────┐
-        │            │             │              │              │
-  ┌─────▼──────┐ ┌───▼───────┐ ┌──▼──────────┐ ┌▼───────────┐ ┌▼───────────┐
-  │  user-     │ │attendance-│ │  outpass-   │ │assignment- │ │   mail-    │
-  │  service   │ │  service  │ │   service   │ │  service   │ │  service   │
-  │            │ │           │ │             │ │            │ │            │
-  │ Students   │ │ QR gen    │ │ Approval    │ │ Deadlines  │ │ Categorized│
-  │ Faculty    │ │ 30s cycle │ │ workflow    │ │ Submissions│ │ academic   │
-  │ Parents    │ │ Eligibility│ │ S→P→W chain│ │ Notifs     │ │ mailing    │
-  │ Wardens    │ │ validation │ │ Cross-svc  │ │            │ │            │
-  └─────┬──────┘ └───┬───────┘ └──┬──────────┘ └┬───────────┘ └┬───────────┘
-        │            │             │              │              │
-        └────────────┴──────┬──────┴──────────────┴──────────────┘
-                            │
-                 ┌──────────▼──────────────┐
-                 │       RabbitMQ           │
-                 │  Async event messaging   │
-                 │                          │
-                 │  outpass.approved ──────► attendance blocked    │
-                 │  attendance.low ────────► parent notification   │
-                 │  assignment.created ────► student alert         │
-                 └──────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                            Next.js Client                               │
+│                  (App Router · React · Tailwind CSS)                    │
+└──────────────────────────────┬─────────────────────────────────────────┘
+                               │  REST
+        ┌──────────────────────┼──────────┬───────────┬───────────┬───────────┐
+        │                      │          │           │           │           │
+  ┌─────▼──────┐ ┌─────────────▼─┐ ┌─────▼──────┐ ┌─▼──────────┐ ┌▼────────┐ ┌▼───────────┐
+  │  user-     │ │  attendance-  │ │  outpass-  │ │    task-   │ │  mail-  │ │   chat-    │
+  │  service   │ │   service     │ │  service   │ │  service   │ │ service │ │  service   │
+  │            │ │               │ │            │ │            │ │         │ │            │
+  │ Students   │ │ QR gen        │ │ Approval   │ │ Deadlines  │ │Categor- │ │ RAG + LLM  │
+  │ Faculty    │ │ 30s cycle     │ │ workflow   │ │ Submissions│ │ized     │ │ Hybrid     │
+  │ Parents    │ │ Eligibility   │ │ S→P→W      │ │ Notifs     │ │ mailing │ │ retrieval  │
+  │ Wardens    │ │ validation    │ │ chain      │ │            │ │         │ │ Intent-    │
+  └─────┬──────┘ └───────┬───────┘ └──┬─────────┘ └┬──────────┘ └┬────────┘ │ aware      │
+        │                │             │             │             │          └┬───────────┘
+        └────────────────┴──────┬──────┴─────────────┴─────────────┘          │
+                                │                                              │
+                   ┌────────────▼──────────────┐              ┌───────────────▼──────────┐
+                   │         RabbitMQ           │              │        ChromaDB           │
+                   │   Async event messaging    │              │       Vector store        │
+                   │                            │              │    Semantic retrieval     │
+                   │ outpass.approved ─────────►│              │  Knowledge + DB sync      │
+                   │   attendance blocked       │              └──────────────────────────┘
+                   │ attendance.low ───────────►│
+                   │   parent notification      │
+                   │ assignment.created ───────►│
+                   │   student alert            │
+                   └────────────────────────────┘
 ```
 
 **Database-per-service isolation** — each service owns its own PostgreSQL schema on NeonDB. Services communicate via **synchronous REST** for direct queries and **RabbitMQ events** for side effects that cross domain boundaries.
@@ -173,6 +179,121 @@ Multiple iterations were needed before arriving at a model that correctly separa
 
 ---
 
+### 🤖 RAG Chat Service
+
+A university-aware conversational assistant powered by **Gemini + ChromaDB**, with hybrid retrieval routing and role-aware identity context. Every query goes through intent classification before any data is fetched — ensuring the right retrieval strategy is used for the right question.
+
+#### Executive Summary
+
+- Full end-to-end chat pipeline is live: intent classification → retrieval routing → context assembly → response generation, all in a single `POST /chat` request.
+- Retrieval is **hybrid by design**: ChromaDB for semantic search over knowledge and synced DB content; Neon/Postgres and service REST APIs for structured live data — routed per classified intent.
+- Gemini handles both **intent classification** (structured JSON output) and **final answer generation**, with validated fallback defaults if classification fails.
+- Session memory is implemented with a **recent-turns + rolling summary** model, giving the assistant conversational continuity within a session.
+- **Role-aware access**: authenticated users get identity-loaded context; anonymous users get limited but functional responses.
+- **Startup data ingestion** automatically populates ChromaDB from local knowledge files and periodic DB sync — zero manual seeding required after deploy.
+- The service is **Dockerized**, health-check instrumented, rate-limited, and integrated into the shared platform network.
+
+#### API Surface
+
+| Endpoint | Access | Purpose |
+|---|---|---|
+| `POST /chat` | Public / JWT optional | Main conversational endpoint |
+| `POST /chat/sync` | Admin only | Manual DB-to-Chroma re-sync trigger |
+| `GET /health` | Public | Chroma connectivity check; degrades gracefully |
+
+#### Chat Pipeline
+
+```
+Request
+   │
+   ├─ Session load / init
+   ├─ Identity load (if authenticated)
+   ├─ Intent classification via Gemini → structured JSON
+   ├─ Intent validation + fallback defaults
+   ├─ Retrieval routing by strategy
+   ├─ Context prompt construction
+   ├─ Response generation via Gemini
+   └─ Session memory update (turns + summary)
+```
+
+#### Retrieval Strategies
+
+| Strategy | When used |
+|---|---|
+| `identity-only` | Query is purely about the requesting user |
+| `skip` | No retrieval needed (meta / chit-chat) |
+| `chroma-only` | Semantic search over knowledge / synced collections |
+| `neon-only` | Direct structured DB query |
+| `rest-api` | Live data from a platform service (e.g. outpass status) |
+| `hybrid` | Combines Chroma semantic + structured source |
+| Hard fallback | Classified strategy has no registered handler |
+
+All retrieval calls are wrapped with **timeout protection**. A handler coverage map is validated at startup — misconfigured intent routing surfaces at boot, not at runtime.
+
+#### RAG Data Ingestion & Sync
+
+- On startup: ingests local `.md` / `.txt` knowledge files into Chroma using paragraph chunking; upserts are idempotent.
+- On startup + periodic interval: syncs platform DB tables into Chroma collections.
+- Mapper layer deliberately **excludes sensitive/private fields** from vector embeddings.
+
+#### Session & Memory
+
+- In-memory session store with TTL-based expiry and cleanup.
+- Memory model: recent turn buffer + rolling compressed summary.
+- Meta signals returned in every response: intent, retrieval strategy used, chunk count, fallback triggered, trim applied.
+
+#### Prompting & Safety
+
+- Prompt includes: system rules, session memory, classified intent, structured data context, semantic chunks, and explicit answering constraints.
+- **No-guess enforcement**: low-context situations return an honest "I don't have enough information" rather than hallucinated answers.
+- Context budget trimming is in place to avoid exceeding model limits.
+
+#### Known Limitations
+
+- **Session store is in-memory only.** Restarting the service resets all active sessions. Multi-instance deployments have no session affinity. Redis persistence is planned.
+- **Context budget trimming is partial.** Each prompt section is trimmed individually but there is no single holistic enforcer across all sections simultaneously.
+- **No persistent chat history.** Conversation turns live only for the TTL of the session — no user-visible history or cross-session recall.
+- **Sync is eventually consistent.** The DB-to-Chroma sync runs on a polling interval; freshly created platform data may not be reflected in semantic search immediately.
+- **Single Gemini model for both tasks.** Intent classification and answer generation both consume Gemini quota. Splitting to a lighter classification model is a future optimization.
+- **No automated test coverage yet.** The pipeline has been manually validated but lacks integration tests across retrieval strategies and intent types.
+
+#### Next Steps
+
+**P0 — Correctness & Hardening**
+- Holistic token budget enforcement across the full assembled prompt
+- Idempotency and deduplication guarantees on the DB sync path
+- Structured error responses from the chat endpoint
+- Logging standardization: intent, strategy, latency, and fallback signals per request
+
+**P1 — Capability & Reliability**
+- Redis-backed session store for persistence and multi-instance support
+- Persistent chat history per user (DB-backed, surfaced in client)
+- Streaming response support via SSE for improved perceived latency
+- Split intent classification onto a lighter/faster model
+
+**P2 — Scale & Observability**
+- Distributed tracing across the full retrieval pipeline
+- Event-driven Chroma invalidation via RabbitMQ instead of polling
+- Conversation analytics: intent distribution, fallback rate, retrieval hit rate
+- Admin dashboard for sync status, session counts, and rate limit metrics
+
+#### Validation / Test Checklist
+
+| Area | Test Case |
+|---|---|
+| Intent classification | Known intents return correct strategy; malformed Gemini output falls back cleanly |
+| Retrieval routing | Each of the 7 strategies is exercised and returns expected context shape |
+| Unauthenticated flow | Anonymous request completes with reduced but valid context |
+| Authenticated flow | JWT user gets identity-loaded response referencing their own data |
+| Fallback enforcement | Low-context query returns refusal, not a hallucinated answer |
+| Rate limiting | N+1 request within window returns 429 |
+| Health check | `GET /health` returns degraded when Chroma is unreachable |
+| Sync idempotency | Running `/chat/sync` twice does not duplicate Chroma documents |
+| Session TTL | Session expires and is cleaned up after TTL window |
+| Context trimming | Long conversation history does not cause prompt to exceed model token limit |
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Backend (all services)
@@ -186,6 +307,14 @@ Multiple iterations were needed before arriving at a model that correctly separa
 | Database | PostgreSQL (NeonDB) |
 | Messaging | RabbitMQ |
 | Media Storage | Cloudinary |
+
+### Chat Service (additional)
+
+| Layer | Technology |
+|---|---|
+| LLM | Google Gemini |
+| Vector Store | ChromaDB |
+| Retrieval | Hybrid (semantic + structured + REST) |
 
 ### Frontend
 
@@ -256,6 +385,16 @@ Multiple data model iterations were needed before arriving at a structure that h
 
 ---
 
+### 🧠 Hybrid RAG Architecture
+
+Building the chat service required navigating a fundamental tension in RAG system design: **when to retrieve semantically vs. structurally vs. live from APIs**. A single retrieval approach breaks down quickly — semantic search can't reliably answer "what is my current attendance percentage", and structured DB queries can't answer open-domain knowledge questions.
+
+The solution was an **intent-first routing layer**: Gemini classifies each query into an intent with an associated retrieval strategy before any data is fetched. This kept retrieval logic clean, testable, and extensible without coupling the LLM layer to any specific data source.
+
+> **Lesson:** In systems that mix unstructured knowledge and live structured data, retrieval routing is the most important architectural decision — not the choice of embedding model or vector store.
+
+---
+
 ### 🌐 Infrastructure-Level Debugging
 
 NeonDB connectivity failed intermittently when accessing through a VPN — a reminder that backend systems are not isolated from environment-level network conditions.
@@ -284,7 +423,7 @@ cd Unibridge
 docker-compose up --build
 ```
 
-This starts RabbitMQ, all backend microservices, and the development environment.
+This starts RabbitMQ, ChromaDB, all backend microservices, and the development environment.
 
 ### 3. Start the frontend
 
@@ -302,13 +441,15 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Area | Planned Improvement |
 |---|---|
-| ⚡ **Redis Caching** | Session caching, QR token store, attendance summary cache |
+| ⚡ **Redis Caching** | Session caching, QR token store, attendance summary cache, chat session persistence |
 | 🌐 **API Gateway** | Centralised auth, routing, rate limiting |
 | 🔗 **GraphQL Federation** | Unified schema across services for the frontend |
 | ☁️ **AWS Deployment** | Production-grade cloud infrastructure |
 | 🛑 **Circuit Breakers** | Prevent cascading failures during service outages |
-| 📊 **Observability** | Centralised logging + distributed tracing |
+| 📊 **Observability** | Centralised logging + distributed tracing (incl. RAG pipeline traces) |
 | 🐳 **Kubernetes** | Container orchestration for production scale |
+| 💬 **Chat Streaming** | SSE-based streaming responses for improved perceived latency |
+| 🔔 **Event-Driven Sync** | RabbitMQ-triggered Chroma invalidation instead of polling |
 
 ---
 
@@ -327,8 +468,9 @@ Open [http://localhost:3000](http://localhost:3000).
 
 <div align="center">
 
-🎓 Built as a deep exploration of distributed systems and microservice architecture.
+🎓 Built as a deep exploration of distributed systems, microservice architecture, and applied RAG design.
 
 ⭐ If this helped you think differently about campus infrastructure, consider starring the repo!
 
 </div>
+```
