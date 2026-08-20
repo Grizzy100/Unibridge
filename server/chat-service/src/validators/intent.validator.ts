@@ -85,3 +85,12 @@ export function validateIntent(raw: Partial<IntentResult>, role: UserRole): Inte
         requiresUserScope,
     };
 }
+
+//Intent: Runs after the user types and sends their question (at runtime/conversation time).
+
+//Bouncer (or Border Security) of your chatbot. 
+//Its job is to protect your system from trusting the AI blindly.
+//AIs can make mistakes, hallucinate, or be tricked by malicious users.
+//Students can only check their own accounts.
+//Wardens can access the hostel gate controls.
+//Admins can access everything.

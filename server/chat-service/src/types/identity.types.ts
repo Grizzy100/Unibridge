@@ -28,6 +28,11 @@ export interface StudentIdentity {
     hostelAssigned: boolean;
     hostelName: string | null;      // The hostel/block name (set via assignStudentHostel)
     roomNumber: string | null;
+    fatherName: string | null;
+    motherName: string | null;
+    guardianName: string | null;
+    parentContact: string | null;
+    emergencyContact: string | null;
     warden: {
         name: string;
         email: string | null;       // warden's login email (from User)

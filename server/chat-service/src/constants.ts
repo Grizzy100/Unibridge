@@ -43,7 +43,23 @@ export const FALLBACK_MESSAGE =
 export const TOP_K = 4;
 
 // ─────────────────────────────────────────────
+// ChromaDB L2 Distance Threshold
+// 0.0 = perfect match, 2.0 = completely unrelated.
+// Results with distance >= 0.8 are filtered out.
+// ─────────────────────────────────────────────
+
+export const CHROMA_DISTANCE_THRESHOLD = 0.8;
+
+// ─────────────────────────────────────────────
+// Text Chunking Config (Sliding Window with Overlap)
+// ─────────────────────────────────────────────
+
+export const CHUNK_SIZE = 1000;
+export const CHUNK_OVERLAP = 200;
+
+// ─────────────────────────────────────────────
 // Context character budget (~3000 tokens ≈ 12000 chars)
 // ─────────────────────────────────────────────
 
 export const CONTEXT_CHAR_BUDGET = 12_000;
+

@@ -1,0 +1,78 @@
+# ===============================
+# OS & Editor (from .gitignore)
+# ===============================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===============================
+# Node.js (from .gitignore)
+# ===============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===============================
+# Environment files (from .gitignore)
+# ===============================
+.env
+.env.*
+!.env.example
+!.env.docker
+
+# ===============================
+# Build outputs (from .gitignore)
+# ===============================
+dist/
+build/
+out/
+coverage/
+
+# ===============================
+# Prisma generated (from .gitignore)
+# ===============================
+generated/
+prisma/generated/
+*.db
+
+# ===============================
+# Logs (from .gitignore)
+# ===============================
+logs/
+*.log
+
+# ===============================
+# Testing (from .gitignore)
+# ===============================
+.nyc_output/
+
+# ===============================
+# Temporary files (from .gitignore)
+# ===============================
+tmp/
+temp/
+
+# ===============================
+# Docker-specific (build context noise)
+# ===============================
+Dockerfile
+.dockerignore
+docker-data/
+
+# ===============================
+# Git (never needed in image)
+# ===============================
+.git/
+.gitignore
+
+# ===============================
+# Dev/debug docs
+# ===============================
+Future-implementations.md
+problem.md
+*.md

@@ -63,7 +63,7 @@ function getIntentDefinitions(role: UserRole): string {
     if (role === "STUDENT") {
         return `
 ## STUDENT INTENT DEFINITIONS
-- PERSONAL_PROFILE      → asking about own name, enrollment number, batch, school, hostel block
+- PERSONAL_PROFILE      → asking about own name, father's/mother's/parent's name, enrollment number, batch, school, hostel block, personal details
 - PERSONAL_ACADEMIC     → asking about own CGPA, backlogs, courses enrolled, grades
 - PERSONAL_ATTENDANCE   → asking about own attendance percentage, records, or missed classes
 - PERSONAL_TASKS        → asking about own assignments, submissions, deadlines, marks

@@ -4,8 +4,8 @@
 
 import { getCollection } from "./chroma.service.js";
 import type { UserIdentity } from "../types/identity.types.js";
-import type { IntentResult, IntentType, StructuredData, SemanticChunks } from "../types/intent.types.js";
-import { TOP_K } from "../constants.js";
+import type { IntentResult, IntentType, StructuredData, SemanticChunks, ChunkWithSource } from "../types/intent.types.js";
+import { TOP_K, CHROMA_DISTANCE_THRESHOLD } from "../constants.js";
 import { sql } from "../lib/neon.js";
 
 const RETRIEVAL_TIMEOUT_MS = 3000;
@@ -110,7 +110,7 @@ async function doRetrieve(
 }
 
 // ─────────────────────────────────────────────
-// ChromaDB semantic search
+// ChromaDB semantic search with Distance Thresholding
 // ─────────────────────────────────────────────
 
 async function queryChromaDB(question: string, collections: string[]): Promise<SemanticChunks> {
@@ -125,21 +125,46 @@ async function queryChromaDB(question: string, collections: string[]): Promise<S
                 const res = await col.query({
                     queryTexts: [question],
                     nResults: Math.min(TOP_K, count),
+                    include: ["documents" as any, "distances" as any, "metadatas" as any],
                 });
-                return (res.documents[0] ?? []).filter((d): d is string => Boolean(d?.trim()));
-            } catch {
+
+                const docs = res.documents[0] ?? [];
+                const distances = res.distances?.[0] ?? [];
+                const metas = res.metadatas?.[0] ?? [];
+
+                const items: ChunkWithSource[] = [];
+
+                for (let i = 0; i < docs.length; i++) {
+                    const text = docs[i];
+                    const dist = distances[i] ?? 1.0;
+                    const meta = metas[i] ?? {};
+                    const source = String(meta.source ?? name);
+
+                    if (text && Boolean(text.trim()) && dist < CHROMA_DISTANCE_THRESHOLD) {
+                        items.push({
+                            text: text.trim(),
+                            source,
+                            score: Number(dist.toFixed(4)),
+                            preview: text.trim().slice(0, 300),
+                        });
+                    }
+                }
+
+                return items;
+            } catch (err: any) {
+                console.warn(`[RetrievalService] Failed ChromaDB query on collection ${name}: ${err?.message}`);
                 return [];
             }
         })
     );
 
     const chunks = results
-        .filter((r): r is PromiseFulfilledResult<string[]> => r.status === "fulfilled")
-        .flatMap(r => r.value)
-        .filter(Boolean);
+        .filter((r): r is PromiseFulfilledResult<ChunkWithSource[]> => r.status === "fulfilled")
+        .flatMap(r => r.value);
 
     return chunks.length > 0 ? chunks : null;
 }
+
 
 // ─────────────────────────────────────────────
 // NeonDB structured queries (for eligibility, academic lookups)

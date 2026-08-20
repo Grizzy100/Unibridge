@@ -5,12 +5,15 @@ import { GoogleGenAI } from "@google/genai";
 import { buildIdentity } from "./identity.service.js";
 import type { UserIdentity } from "../types/identity.types.js";
 import type { GeminiTurn, ConversationMemory } from "../types/memory.types.js";
+import { redis } from "../utils/redis";
 
 const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? "" });
 const SUMMARY_MODEL = process.env.GEMINI_CHAT_MODEL ?? "gemini-2.5-flash";
 const SESSION_TTL_MS = 30 * 60 * 1000;  // 30 minutes
 const MAX_RECENT_TURNS = 6;              // Keep last 6 turns (3 exchanges) in-memory
 const COMPRESS_AFTER = 12;              // Compress when > 12 turns total
+const SESSION_TTL_SECONDS = Math.ceil(SESSION_TTL_MS / 1000);
+const REDIS_SESSION_PREFIX = "chat:session:";
 
 export type Session = {
     identity: UserIdentity | null;
@@ -21,6 +24,30 @@ export type Session = {
 };
 
 const sessions = new Map<string, Session>();
+
+function redisSessionKey(sessionId: string): string {
+    return `${REDIS_SESSION_PREFIX}${sessionId}`;
+}
+
+async function saveSessionToRedis(sessionId: string, session: Session): Promise<void> {
+    try {
+        await redis.set(redisSessionKey(sessionId), JSON.stringify(session), "EX", SESSION_TTL_SECONDS);
+    } catch (error) {
+        console.warn("[SessionService] Failed to persist session to Redis:", error);
+    }
+}
+
+async function loadSessionFromRedis(sessionId: string): Promise<Session | null> {
+    try {
+        const raw = await redis.get(redisSessionKey(sessionId));
+        if (!raw) return null;
+
+        return JSON.parse(raw) as Session;
+    } catch (error) {
+        console.warn("[SessionService] Failed to load session from Redis:", error);
+        return null;
+    }
+}
 
 // ─────────────────────────────────────────────
 // Init / Get
@@ -36,7 +63,22 @@ export async function getOrInitSession(
     if (existing) {
         existing.lastActive = Date.now();
         if (jwt && !existing.jwt) existing.jwt = jwt; // Store JWT if first time
+        void saveSessionToRedis(sessionId, existing);
         return existing;
+    }
+
+    const cached = await loadSessionFromRedis(sessionId);
+    if (cached) {
+        cached.lastActive = Date.now();
+        if (jwt && !cached.jwt) cached.jwt = jwt;
+
+        if (userId && userId !== "anonymous") {
+            cached.identity = await buildIdentity(userId, role);
+        }
+
+        sessions.set(sessionId, cached);
+        void saveSessionToRedis(sessionId, cached);
+        return cached;
     }
 
     const session: Session = {
@@ -58,6 +100,7 @@ export async function getOrInitSession(
     }
 
     sessions.set(sessionId, session);
+    void saveSessionToRedis(sessionId, session);
     return session;
 }
 
@@ -122,6 +165,8 @@ ${transcript}`;
             // If compression fails, keep the summary as-is
         }
     }
+
+    void saveSessionToRedis(sessionId, session);
 }
 
 // ─────────────────────────────────────────────
@@ -130,6 +175,7 @@ ${transcript}`;
 
 export function clearSession(sessionId: string): void {
     sessions.delete(sessionId);
+    void redis.del(redisSessionKey(sessionId));
 }
 
 export function cleanupStaleSessions(): void {
@@ -140,3 +186,16 @@ export function cleanupStaleSessions(): void {
         }
     }
 }
+
+
+
+//Memory Manager
+// I didn't want to use a heavy external database like Redis just to track active 
+// chat sessions, so I built an in-memory session manager. 
+// It acts as an asynchronous state machine. Every time a message is sent, 
+// it updates the short-term sliding window array. But more importantly, 
+// it monitors the length of the chat. When the chat exceeds our defined 
+// limits, it asynchronously splices the oldest messages and runs them 
+// through a secondary, cheaper LLM to generate a rolling summary. 
+// This guarantees our sessions stay memory-efficient on the server, 
+// and token-efficient on the API.

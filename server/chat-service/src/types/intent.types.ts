@@ -50,8 +50,19 @@ export interface IntentResult {
     requiresUserScope: boolean;
 }
 
+// Single semantic chunk with source metadata & relevance score
+export interface ChunkWithSource {
+    text: string;
+    source: string;
+    score: number;       // ChromaDB L2 distance (lower = more relevant)
+    preview: string;     // First 300 characters
+}
+
 // Structured data retrieved from NeonDB or REST APIs
 export type StructuredData = Record<string, unknown> | null;
 
-// Semantic chunks from ChromaDB
-export type SemanticChunks = string[] | null;
+// Semantic chunks from ChromaDB with metadata
+export type SemanticChunks = ChunkWithSource[] | null;
+
+// This file defines the Vocabulary and the Action Plan for the AI
+// Dictates what should understand and what not

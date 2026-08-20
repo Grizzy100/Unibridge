@@ -1,37 +1,42 @@
 // server/chat-service/src/services/context-budget.service.ts
 
+import type { ChunkWithSource } from "../types/intent.types.js";
+
 export function enforceContextBudget(
     structuredPrompt: string,
-    semanticChunks: string[],
+    semanticChunks: ChunkWithSource[],
     charBudget: number
-): { safeStructured: string; safeChunks: string[]; wasTrimmed: boolean } {
+): { safeStructured: string; safeChunks: ChunkWithSource[]; wasTrimmed: boolean } {
     let wasTrimmed = false;
     
     // First, determine sizes
     const structuredSize = structuredPrompt.length;
-    const initialChunksTotalSize = semanticChunks.reduce((acc, c) => acc + c.length, 0);
+    const initialChunksTotalSize = semanticChunks.reduce((acc, c) => acc + c.text.length, 0);
 
     if (structuredSize + initialChunksTotalSize <= charBudget) {
         return { safeStructured: structuredPrompt, safeChunks: semanticChunks, wasTrimmed: false };
     }
 
     wasTrimmed = true;
-    let safeChunks: string[] = [];
+    let safeChunks: ChunkWithSource[] = [];
     let remainingBudget = charBudget - structuredSize;
 
     if (remainingBudget > 0) {
         // We have room for some chunks. Add complete chunks until we hit the budget.
-        // If a single chunk is too big, skip it to avoid cutting sentences mid-way, or cut at sentence boundary.
         for (const chunk of semanticChunks) {
-            if (chunk.length <= remainingBudget) {
+            if (chunk.text.length <= remainingBudget) {
                 safeChunks.push(chunk);
-                remainingBudget -= chunk.length;
+                remainingBudget -= chunk.text.length;
             } else {
                 // Try to find the last sentence boundary that fits
-                const truncated = trimToLastSentenceBoundary(chunk, remainingBudget);
-                if (truncated.length > 50) { // arbitrary minimum useful length
-                    safeChunks.push(truncated);
-                    remainingBudget -= truncated.length;
+                const truncatedText = trimToLastSentenceBoundary(chunk.text, remainingBudget);
+                if (truncatedText.length > 50) {
+                    safeChunks.push({
+                        ...chunk,
+                        text: truncatedText,
+                        preview: truncatedText.slice(0, 300),
+                    });
+                    remainingBudget -= truncatedText.length;
                 }
                 break; // Stop adding more chunks once we start trimming
             }
@@ -42,7 +47,6 @@ export function enforceContextBudget(
         
         // And now we must trim the structured data itself
         const overage = structuredSize - charBudget;
-        // Keep the top part of the structured prompt, which usually has the most important fields
         const safeLen = Math.max(0, structuredSize - overage);
         const truncatedData = trimToLastSentenceBoundary(structuredPrompt, safeLen);
         
@@ -61,6 +65,7 @@ export function enforceContextBudget(
         wasTrimmed: true
     };
 }
+
 
 function trimToLastSentenceBoundary(text: string, maxLen: number): string {
     if (text.length <= maxLen) return text;
@@ -82,3 +87,11 @@ function trimToLastSentenceBoundary(text: string, maxLen: number): string {
     
     return candidate.trim();
 }
+
+
+//This file acts like an Accountant and enforecs on CONTEXT_CHARACTER_BUDGET
+//We  have handled the edge case where few tokens are left, so take in query from user
+// but need to trim down some partialDeepStrictEqual. We dont trim from halfway , but the last 
+// 'fullstop', 'exclamation mark', 'question mark', 'newline' or 'space'.
+
+//if no token left , then drop the entire chunks

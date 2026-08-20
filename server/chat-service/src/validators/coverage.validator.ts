@@ -34,3 +34,14 @@ export function validateIntentCoverage(handledIntents: Record<IntentType, true>)
         console.log("[CoverageValidator] All declared intents have retrieval handlers mapped. ✓");
     }
 }
+
+
+//Coverage: Runs before the user can even type a single character (at startup/compile time).
+
+// The Startup Check (coverage.validator.ts)
+// Before you open the doors to the public, you look at your printed paper Menu and your list of Chefs.
+
+// The menu says you serve Pizza, Pasta, and Sushi.
+// But you look at your kitchen staff and realize: "Wait, we don't have a Sushi chef! If a customer tries to order sushi, the kitchen will break down!"
+// So, you refuse to open the restaurant until you hire a Sushi chef or remove Sushi from the menu.
+// This is Coverage Validation. It makes sure the kitchen is fully capable of cooking everything on the menu.

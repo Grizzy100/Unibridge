@@ -2,7 +2,7 @@
 // The main chat pipeline — wires all services together.
 //
 // Flow:
-//   Session → Identity → Intent classify → Validate → Retrieve → Fallback? → Context → Gemini → Memory
+//   Session → Identity (First verify) → Intent classify (Messy english to JSON object) → Validate → Retrieve → Fallback? → Context → Gemini → Memory
 
 import { GoogleGenAI } from "@google/genai";
 import {
@@ -83,6 +83,15 @@ export async function chat(
     const history = getHistory(sessionId);
 
     // ── Step 8: Generate Response ──────────────────────────────────────────
+    const sources = (semanticChunks ?? []).map(c => ({
+        source: c.source,
+        // Convert ChromaDB L2 distance to similarity score (lower distance = higher score)
+        score: Number((1 - Math.min(c.score, 1)).toFixed(4)),
+        preview: c.preview,
+    }));
+
+    const topRetrievalConfidence = sources.length > 0 ? sources[0].score : 0;
+
     try {
         const response = await gemini.models.generateContent({
             model: CHAT_MODEL,
@@ -92,6 +101,8 @@ export async function chat(
             ],
             config: {
                 systemInstruction,
+                temperature: 0.1,
+                maxOutputTokens: 1024,
             },
         });
 
@@ -106,10 +117,12 @@ export async function chat(
             meta: {
                 intent: intent.intent,
                 confidence: intent.confidence,
+                retrievalConfidence: topRetrievalConfidence,
                 retrievalSource: intent.retrieval,
                 chunksFound: chunksCount,
                 usedFallback: answer === FALLBACK_MESSAGE,
-                wasTrimmed: contextResult.wasTrimmed
+                wasTrimmed: contextResult.wasTrimmed,
+                sources,
             }
         };
 
@@ -121,11 +134,18 @@ export async function chat(
             meta: {
                 intent: intent.intent,
                 confidence: intent.confidence,
+                retrievalConfidence: topRetrievalConfidence,
                 retrievalSource: intent.retrieval,
                 chunksFound: chunksCount,
                 usedFallback: true,
-                wasTrimmed: contextResult.wasTrimmed
+                wasTrimmed: contextResult.wasTrimmed,
+                sources,
             }
         };
     }
 }
+
+
+
+//stitches everything together
+//

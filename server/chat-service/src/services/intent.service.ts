@@ -71,3 +71,8 @@ function safeDefault(role: UserRole): IntentResult {
         requiresUserScope: false,
     };
 }
+
+
+//this service runs a lightning-fast, highly constrained AI call to 
+// translate messy human English into strict JSON data so our backend 
+// knows exactly which databases to query

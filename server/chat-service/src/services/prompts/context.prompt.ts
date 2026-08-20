@@ -67,14 +67,14 @@ ${formatSemanticChunks(safeChunks.length > 0 ? safeChunks : null)}
    (e.g. "Your CGPA is 8.2 which meets the 8.0 requirement, so you are eligible.")
 4. If NEITHER is present → use the fallback message, never guess or make up data
 5. Never expose raw JSON keys or field names to the user
-6. Never share data marked private (phone, address, raw database IDs)
+6. Never expose passwords or raw database IDs
 7. Keep the answer natural — do not say "the context says..." or "based on the data..."
 
 ## PRIVACY GUARDRAILS
-- CGPA, backlogs, attendance → only share with the owner
+- Personal profile & academic fields (Name, Father's Name, Mother's Name, CGPA, backlogs, attendance, room) → share with the logged-in owner of the account
 - Teacher email → shareable if retrieved from knowledge base
 - Warden contact → shareable only with students in that block
-- Another student's personal data → never share under any circumstances
+- ANOTHER student's or user's personal data → NEVER share under any circumstances
 
 ## CURRENT QUESTION FROM ${(identity?.name ?? "USER").toUpperCase()}
 "${currentMessage}"
@@ -116,9 +116,10 @@ function formatSemanticChunks(chunks: SemanticChunks): string {
         return "No relevant policy or knowledge base content found.";
     }
     return chunks
-        .map((chunk, i) => `[Source ${i + 1}]: ${chunk}`)
+        .map((chunk, i) => `[Source ${i + 1} (${chunk.source})]: ${chunk.text}`)
         .join("\n---\n");
 }
+
 
 function humanizeKey(key: string): string {
     return key

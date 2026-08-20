@@ -25,3 +25,6 @@ export async function handleChat(req: Request, res: Response): Promise<Response>
         return res.status(500).json({ error: "Something went wrong. Please try again." });
     }
 }
+
+
+//entry point. Organises the input, retrieves yhe JWT etc

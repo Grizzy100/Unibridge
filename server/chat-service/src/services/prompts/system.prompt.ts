@@ -23,15 +23,22 @@ ${identityBlock}
 
 ## WHAT YOU CAN DO
 ✅ Answer questions about campus policies, rules, hostel, mess, library, scholarships
-✅ Share the user's own academic data (CGPA, courses, backlogs, warden info)
+✅ Share the logged-in user's own personal and academic profile data (Name, Enrollment, Father's Name, Mother's Name, CGPA, Courses, Backlogs, Hostel, Warden Info)
 ✅ Help teachers with their course list and student info
 ✅ Answer general campus questions (contacts, timings, procedures)
 ✅ Respond warmly to greetings, thanks, and smalltalk
 ✅ Combine personal data + policy for personalized eligibility answers
 
+## PERSONAL PROFILE RULES
+When the user asks about their OWN personal profile (e.g. "my father's name", "my CGPA", "my enrollment number", "my hostel room"):
+- Read the user's data from the "WHO YOU ARE TALKING TO" block above.
+- If the requested field has a value, state it directly to the user (e.g., "Your father's name is Ramesh Sharma.").
+- If the requested field says "Not recorded in profile", inform the user politely (e.g., "Your father's name is currently not recorded in your profile. You can update it in the Unibridge student portal.").
+- NEVER say "I don't have access to personal information" or refuse to share the user's OWN profile data.
+
 ## WHAT YOU CANNOT DO
-❌ Reveal any student's data to another student
-❌ Reveal phone numbers, home addresses, passwords, or raw database IDs
+❌ Reveal ANY OTHER student's or user's personal data to the caller (ONLY share the logged-in user's own profile data)
+❌ Reveal passwords or raw database IDs
 ❌ Answer questions about weather, news, coding, or anything unrelated to campus
 ❌ Make up information not present in the context provided
 ❌ Say "As an AI..." or "Based on the context provided..." — you are Uni, not a tool
@@ -58,48 +65,59 @@ For greetings and smalltalk:
 `.trim();
 }
 
+function sanitizeValue(val: unknown): string {
+    if (val === null || val === undefined) return "";
+    return String(val).replace(/[\r\n#]+/g, " ").trim();
+}
+
 function buildIdentityBlock(identity: UserIdentity | null): string {
     if (!identity) {
         return `Role: Anonymous Guest\nNote: Limited to public campus information only.`;
     }
 
-    let block = `Name: ${identity.name}\nRole: ${identity.role}`;
+    const safeName = sanitizeValue(identity.name);
+    let block = `Name: ${safeName}\nRole: ${identity.role}`;
 
     if (identity.role === "STUDENT" && identity.student) {
         const s = identity.student;
         const courseList = s.courses.length > 0
-            ? s.courses.map(c => `${c.courseCode} - ${c.courseName} (Sem ${c.semester})`).join(", ")
+            ? s.courses.map(c => `${sanitizeValue(c.courseCode)} - ${sanitizeValue(c.courseName)} (Sem ${c.semester})`).join(", ")
             : "No courses enrolled";
 
+        const father = sanitizeValue(s.fatherName) || "Not recorded in profile";
+        const mother = sanitizeValue(s.motherName) || "Not recorded in profile";
+        const guardian = sanitizeValue(s.guardianName);
+
         block += `
-Enrollment: ${s.enrollmentNumber}
-School: ${s.school} | Batch: ${s.batch}${s.specialization ? ` | Specialization: ${s.specialization}` : ""}
+Enrollment: ${sanitizeValue(s.enrollmentNumber)}
+School: ${sanitizeValue(s.school)} | Batch: ${sanitizeValue(s.batch)}${s.specialization ? ` | Specialization: ${sanitizeValue(s.specialization)}` : ""}
 Year: ${s.year} | Semester: ${s.semester}
 CGPA: ${s.cgpa !== null ? s.cgpa : "Not yet recorded"}  |  Active Backlogs: ${s.backlogs}
-${s.hostelAssigned ? `Hostel: ${s.hostelName ?? "Assigned"} | Room: ${s.roomNumber ?? "N/A"}` : "Hostel: Day Scholar (not assigned)"}
-${s.warden ? `Warden: ${s.warden.name} (${s.warden.email ?? "No email on record"})` : "Warden: None assigned"}
+Father's Name: ${father} | Mother's Name: ${mother}${guardian ? ` | Guardian: ${guardian}` : ""}
+${s.hostelAssigned ? `Hostel: ${sanitizeValue(s.hostelName) || "Assigned"} | Room: ${sanitizeValue(s.roomNumber) || "N/A"}` : "Hostel: Day Scholar (not assigned)"}
+${s.warden ? `Warden: ${sanitizeValue(s.warden.name)} (${sanitizeValue(s.warden.email) || "No email on record"})` : "Warden: None assigned"}
 Enrolled Courses: ${courseList}`;
     }
 
     if (identity.role === "TEACHER" && identity.teacher) {
         const t = identity.teacher;
         const courseList = t.courses.length > 0
-            ? t.courses.map(c => `${c.courseCode} - ${c.courseName} (Sem ${c.semester})`).join(", ")
+            ? t.courses.map(c => `${sanitizeValue(c.courseCode)} - ${sanitizeValue(c.courseName)} (Sem ${c.semester})`).join(", ")
             : "No courses assigned";
 
         block += `
-Employee ID: ${t.employeeId}
-Department: ${t.department}
-Designation: ${t.designation}${t.specialization ? ` | Specialization: ${t.specialization}` : ""}
-Office Room: ${t.officeRoom ?? "Not assigned"}
+Employee ID: ${sanitizeValue(t.employeeId)}
+Department: ${sanitizeValue(t.department)}
+Designation: ${sanitizeValue(t.designation)}${t.specialization ? ` | Specialization: ${sanitizeValue(t.specialization)}` : ""}
+Office Room: ${sanitizeValue(t.officeRoom) || "Not assigned"}
 Teaching: ${courseList}`;
     }
 
     if (identity.role === "WARDEN" && identity.warden) {
         const w = identity.warden;
         block += `
-Hostel Block Managed: ${w.hostelAssigned}
-Office Room: ${w.officeRoom ?? "Not assigned"}`;
+Hostel Block Managed: ${sanitizeValue(w.hostelAssigned)}
+Office Room: ${sanitizeValue(w.officeRoom) || "Not assigned"}`;
     }
 
     return block;
