@@ -203,6 +203,20 @@ Multiple iterations were needed before arriving at a model that correctly separa
 
 ---
 
+## ⚙️ Environment
+
+The services now use a shared Redis connection string for rate limiting and BullMQ jobs.
+
+Example values live in [/.env.example](.env.example).
+
+Minimum Redis-related setting:
+
+```bash
+REDIS_URL=redis://localhost:6379
+```
+
+---
+
 ## ⚠️ Engineering Challenges Solved
 
 ### 🔄 Breaking ORM Upgrade Mid-Development
